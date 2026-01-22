@@ -11,8 +11,8 @@ export const metadata: Metadata = {
   title: "BE NURSE - Educación en Salud Sexual",
   description: "Plataforma educativa y de apoyo comunitario sobre salud sexual",
   icons: {
-    icon: '/logo.jpg',
-    apple: '/logo.jpg',
+    icon: '/logo.png',
+    apple: '/logo.png',
   },
 }
 

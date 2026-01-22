@@ -32,7 +32,7 @@ export default async function HomePage() {
         <div className="max-w-3xl mx-auto text-center">
           <div className="flex justify-center mb-6">
             <Image
-              src="/logo.jpg"
+              src="/logo.png"
               alt="BE NURSE Logo"
               width={120}
               height={120}

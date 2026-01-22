@@ -32,7 +32,7 @@ export function AdminNav() {
         <div className="flex items-center space-x-8">
           <Link href="/admin" className="flex items-center space-x-3 hover:opacity-80 transition-opacity">
             <Image
-              src="/logo.jpg"
+              src="/logo.png"
               alt="BE NURSE Logo"
               width={32}
               height={32}

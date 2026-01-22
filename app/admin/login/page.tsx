@@ -45,7 +45,7 @@ export default function AdminLoginPage() {
         <CardHeader className="text-center">
           <div className="flex justify-center mb-4">
             <Image
-              src="/logo.jpg"
+              src="/logo.png"
               alt="BE NURSE Logo"
               width={80}
               height={80}

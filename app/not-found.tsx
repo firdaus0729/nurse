@@ -7,7 +7,7 @@ export default function NotFound() {
     <div className="container py-16 text-center">
       <div className="flex justify-center mb-6">
         <Image
-          src="/logo.jpg"
+          src="/logo.png"
           alt="BE NURSE Logo"
           width={100}
           height={100}

@@ -9,7 +9,7 @@ export function Footer() {
           <div>
             <Link href="/" className="flex items-center space-x-3 mb-4 hover:opacity-80 transition-opacity">
               <Image
-                src="/logo.jpg"
+                src="/logo.png"
                 alt="BE NURSE Logo"
                 width={48}
                 height={48}

@@ -33,7 +33,7 @@ The BE NURSE color scheme has been designed to harmonize with healthcare brandin
 
 ### Step 1: Identify Your Logo Colors
 
-1. Open your logo image (`public/logo.jpg`)
+1. Open your logo image (`public/logo.png`)
 2. Identify the main colors:
    - Primary color (most prominent)
    - Secondary/accent color (if any)
