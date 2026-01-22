@@ -63,7 +63,7 @@ export default function AdminCarouselPage() {
                   className={`text-xs px-2 py-1 rounded ${
                     slide.isActive
                       ? 'bg-green-100 text-green-800'
-                      : 'bg-gray-100 text-gray-800'
+                      : 'bg-muted text-muted-foreground'
                   }`}
                 >
                   {slide.isActive ? 'Activo' : 'Inactivo'}

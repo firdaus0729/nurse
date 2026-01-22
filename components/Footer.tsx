@@ -3,7 +3,7 @@ import Image from 'next/image'
 
 export function Footer() {
   return (
-    <footer className="border-t bg-gray-50 mt-16">
+    <footer className="border-t bg-gradient-to-b from-background to-secondary/30 mt-16">
       <div className="container py-8">
         <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
           <div>

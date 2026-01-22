@@ -15,7 +15,7 @@ export default async function AdminLayout({
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-gradient-to-b from-background to-secondary/20">
       <AdminNav />
       <div className="container py-8">{children}</div>
     </div>
