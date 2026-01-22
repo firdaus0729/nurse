@@ -71,17 +71,17 @@ export function HeroCarousel({ slides }: HeroCarouselProps) {
               priority={index === 0}
             />
           )}
-          <div className="absolute inset-0 bg-black/40 flex items-center justify-center">
+          <div className="absolute inset-0 bg-gradient-to-b from-primary/60 via-primary/50 to-primary/70 flex items-center justify-center">
             <div className="text-center text-white px-4 max-w-3xl">
-              <h1 className="text-3xl md:text-5xl font-bold mb-4">
+              <h1 className="text-3xl md:text-5xl font-bold mb-4 drop-shadow-lg">
                 {slide.title}
               </h1>
               {slide.subtitle && (
-                <p className="text-lg md:text-xl mb-6">{slide.subtitle}</p>
+                <p className="text-lg md:text-xl mb-6 drop-shadow-md">{slide.subtitle}</p>
               )}
               {slide.ctaText && slide.ctaLink && (
                 <Link href={slide.ctaLink}>
-                  <Button size="lg" variant="default">
+                  <Button size="lg" variant="default" className="bg-white text-primary hover:bg-white/90 shadow-lg">
                     {slide.ctaText}
                   </Button>
                 </Link>
@@ -95,14 +95,14 @@ export function HeroCarousel({ slides }: HeroCarouselProps) {
         <>
           <button
             onClick={goToPrevious}
-            className="absolute left-4 top-1/2 -translate-y-1/2 bg-black/50 hover:bg-black/70 text-white p-2 rounded-full transition-colors"
+            className="absolute left-4 top-1/2 -translate-y-1/2 bg-primary/80 hover:bg-primary text-white p-2 rounded-full transition-colors shadow-lg backdrop-blur-sm"
             aria-label="Slide anterior"
           >
             <ChevronLeft className="h-6 w-6" />
           </button>
           <button
             onClick={goToNext}
-            className="absolute right-4 top-1/2 -translate-y-1/2 bg-black/50 hover:bg-black/70 text-white p-2 rounded-full transition-colors"
+            className="absolute right-4 top-1/2 -translate-y-1/2 bg-primary/80 hover:bg-primary text-white p-2 rounded-full transition-colors shadow-lg backdrop-blur-sm"
             aria-label="Slide siguiente"
           >
             <ChevronRight className="h-6 w-6" />

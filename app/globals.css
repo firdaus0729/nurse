@@ -17,8 +17,9 @@
     --popover-foreground: 220 13% 18%;
     
     /* Primary - Green from logo (healthcare, growth, wellness) */
-    /* Professional healthcare green - adjust hue (140-160) to match your exact logo green */
-    --primary: 150 70% 40%;
+    /* Professional healthcare green - vibrant and matches logo */
+    /* Adjust hue (140-160), saturation (70-85%), lightness (35-45%) to match your exact logo green */
+    --primary: 150 75% 38%;
     --primary-foreground: 0 0% 100%;
     
     /* Secondary - Soft complementary color (light green tint) */
@@ -40,7 +41,7 @@
     /* Borders and inputs - subtle green tint */
     --border: 150 15% 90%;
     --input: 150 15% 90%;
-    --ring: 150 70% 40%;
+    --ring: 150 75% 38%;
     
     /* Border radius */
     --radius: 0.5rem;
