@@ -1,0 +1,199 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// Staff/Admin users
+model User {
+  id            String   @id @default(cuid())
+  email         String   @unique
+  password      String
+  name          String?
+  role          UserRole @default(NURSE)
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+  
+  conversations Conversation[]
+  
+  @@map("users")
+}
+
+enum UserRole {
+  NURSE
+  ADMIN
+}
+
+// Hero carousel slides
+model CarouselSlide {
+  id          String   @id @default(cuid())
+  title       String
+  subtitle    String?
+  imageUrl    String?
+  ctaText     String?
+  ctaLink     String?
+  order       Int      @default(0)
+  isActive    Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  
+  @@map("carousel_slides")
+  @@index([order])
+}
+
+// Quick access cards
+model QuickAccessCard {
+  id          String   @id @default(cuid())
+  title       String
+  description String?
+  icon        String?  // Icon name/identifier
+  link        String
+  order       Int      @default(0)
+  isActive    Boolean  @default(true)
+  isCampaign  Boolean  @default(false) // Temporary campaign flag
+  campaignEnd DateTime? // When campaign expires
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  
+  @@map("quick_access_cards")
+  @@index([order])
+}
+
+// Content categories
+model Category {
+  id          String   @id @default(cuid())
+  name        String
+  slug        String   @unique
+  description String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  
+  articles    Article[]
+  
+  @@map("categories")
+}
+
+// Tags for content
+model Tag {
+  id          String   @id @default(cuid())
+  name        String
+  slug        String   @unique
+  createdAt   DateTime @default(now())
+  
+  articles    Article[]
+  
+  @@map("tags")
+}
+
+// Articles/Blog posts
+model Article {
+  id          String   @id @default(cuid())
+  title       String
+  slug        String   @unique
+  excerpt     String?
+  content     String   @db.Text
+  imageUrl    String?
+  isPublished Boolean  @default(false)
+  isFeatured  Boolean  @default(false)
+  viewCount   Int      @default(0)
+  publishedAt DateTime?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  
+  categoryId  String?
+  category    Category? @relation(fields: [categoryId], references: [id], onDelete: SetNull)
+  tags        Tag[]
+  
+  @@map("articles")
+  @@index([slug])
+  @@index([isPublished, publishedAt])
+  @@index([isFeatured])
+}
+
+// Static pages
+model Page {
+  id          String   @id @default(cuid())
+  title       String
+  slug        String   @unique
+  content     String   @db.Text
+  isPublished Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  
+  sections    Section[]
+  
+  @@map("pages")
+  @@index([slug])
+}
+
+// Page sections (for structured content)
+model Section {
+  id          String   @id @default(cuid())
+  pageId      String
+  title       String?
+  content     String   @db.Text
+  order       Int      @default(0)
+  type        SectionType @default(CONTENT)
+  metadata    Json?    @db.Json // For accordions, FAQs, etc.
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  
+  page        Page     @relation(fields: [pageId], references: [id], onDelete: Cascade)
+  
+  @@map("sections")
+  @@index([pageId, order])
+}
+
+enum SectionType {
+  CONTENT
+  ACCORDION
+  FAQ
+  CARD_GRID
+}
+
+// Anonymous chat conversations
+model Conversation {
+  id          String   @id @default(uuid())
+  uuid        String   @unique @default(uuid()) // Public-facing UUID
+  status      ConversationStatus @default(OPEN)
+  topic       String?  // Manual topic assignment
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  closedAt    DateTime?
+  
+  userId      String?  // Assigned nurse/admin
+  user        User?    @relation(fields: [userId], references: [id], onDelete: SetNull)
+  messages    Message[]
+  
+  @@map("conversations")
+  @@index([uuid])
+  @@index([status])
+  @@index([userId])
+}
+
+enum ConversationStatus {
+  OPEN
+  IN_PROGRESS
+  CLOSED
+}
+
+// Chat messages
+model Message {
+  id             String   @id @default(cuid())
+  conversationId String
+  content        String   @db.Text
+  isFromUser     Boolean  @default(true) // true = anonymous user, false = nurse/admin
+  createdAt      DateTime @default(now())
+  
+  conversation   Conversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
+  
+  @@map("messages")
+  @@index([conversationId, createdAt])
+}
+
