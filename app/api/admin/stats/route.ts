@@ -3,6 +3,9 @@ import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth'
 import { prisma } from '@/lib/prisma'
 
+// This route relies on request headers/cookies (NextAuth session) and must be dynamic.
+export const dynamic = 'force-dynamic'
+
 // Get basic statistics
 export async function GET() {
   try {

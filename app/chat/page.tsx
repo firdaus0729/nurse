@@ -58,9 +58,11 @@ export default function ChatPage() {
 
         if (createResponse.ok) {
           const data = await createResponse.json()
-          convId = data.conversationId
+          convId = data.conversationId as string
           setConversationId(convId)
-          localStorage.setItem('chatConversationId', convId)
+          if (convId) {
+            localStorage.setItem('chatConversationId', convId)
+          }
         } else {
           throw new Error('Failed to create conversation')
         }
@@ -78,7 +80,9 @@ export default function ChatPage() {
       }
 
       // Reload messages
-      await loadMessages(convId)
+      if (convId) {
+        await loadMessages(convId)
+      }
     } catch (error) {
       console.error('Error sending message:', error)
       alert('Error al enviar el mensaje. Por favor, intenta de nuevo.')

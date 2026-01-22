@@ -9,7 +9,7 @@ import { Button } from './ui/button'
 import {
   LayoutDashboard,
   MessageCircle,
-  Image,
+  Image as ImageIcon,
   Grid3x3,
   FileText,
   LogOut,
@@ -18,7 +18,7 @@ import {
 const adminNavItems = [
   { href: '/admin', label: 'Dashboard', icon: LayoutDashboard },
   { href: '/admin/chat', label: 'Chat', icon: MessageCircle },
-  { href: '/admin/carousel', label: 'Carrusel', icon: Image },
+  { href: '/admin/carousel', label: 'Carrusel', icon: ImageIcon },
   { href: '/admin/quick-access', label: 'Accesos rápidos', icon: Grid3x3 },
   { href: '/admin/content', label: 'Contenido', icon: FileText },
 ]
