@@ -23,7 +23,11 @@ interface HeroCarouselProps {
 
 export function HeroCarousel({ slides }: HeroCarouselProps) {
   const [currentIndex, setCurrentIndex] = useState(0)
-  const activeSlides = slides.filter(slide => slide.isActive).sort((a, b) => a.order - b.order)
+  // Only show first 3 active slides, sorted by order
+  const activeSlides = slides
+    .filter(slide => slide.isActive)
+    .sort((a, b) => a.order - b.order)
+    .slice(0, 3)
 
   useEffect(() => {
     if (activeSlides.length <= 1) return
@@ -71,17 +75,18 @@ export function HeroCarousel({ slides }: HeroCarouselProps) {
               priority={index === 0}
             />
           )}
-          <div className="absolute inset-0 bg-gradient-to-b from-primary/60 via-primary/50 to-primary/70 flex items-center justify-center">
-            <div className="text-center text-white px-4 max-w-3xl">
-              <h1 className="text-3xl md:text-5xl font-bold mb-4 drop-shadow-lg">
+          {/* Subtle overlay for text readability, not full green background */}
+          <div className="absolute inset-0 bg-black/20 flex items-center justify-center">
+            <div className="text-center text-white px-4 max-w-3xl z-10">
+              <h1 className="text-3xl md:text-5xl font-bold mb-6 drop-shadow-lg">
                 {slide.title}
               </h1>
               {slide.subtitle && (
                 <p className="text-lg md:text-xl mb-6 drop-shadow-md">{slide.subtitle}</p>
               )}
               {slide.ctaText && slide.ctaLink && (
-                <Link href={slide.ctaLink}>
-                  <Button size="lg" variant="default" className="bg-white text-primary hover:bg-white/90 shadow-lg">
+                <Link href={slide.ctaLink} className="inline-block">
+                  <Button size="lg" variant="default" className="bg-white text-primary hover:bg-white/90 shadow-lg text-base md:text-lg px-8 py-6">
                     {slide.ctaText}
                   </Button>
                 </Link>

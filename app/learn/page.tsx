@@ -1,7 +1,17 @@
 import { prisma } from '@/lib/prisma'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { AccordionSection } from '@/components/AccordionSection'
+import { StiCardGrid, type StiItem } from '@/components/StiCardGrid'
 import Link from 'next/link'
+
+function slugify(input: string) {
+  return input
+    .toLowerCase()
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/(^-|-$)/g, '')
+}
 
 export default async function LearnPage() {
   const page = await prisma.page.findUnique({
@@ -28,9 +38,68 @@ export default async function LearnPage() {
     <div className="container py-8">
       <h1 className="text-4xl font-bold mb-8">Infórmate</h1>
       
+      {/* Quick navigation cards */}
+      {page?.sections?.length ? (
+        <div className="mb-10">
+          <p className="text-muted-foreground mb-4">
+            La sección Infórmate se organiza en bloques navegables. Elige uno para ir directamente:
+          </p>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+            {page.sections.map((section) => {
+              const title = section.title?.trim()
+              if (!title) return null
+              const id = slugify(title)
+              return (
+                <a key={section.id} href={`#${id}`} className="group">
+                  <Card className="h-full transition-all hover:shadow-lg hover:-translate-y-0.5">
+                    <CardHeader>
+                      <CardTitle className="text-lg group-hover:text-primary">
+                        {title}
+                      </CardTitle>
+                      <CardDescription>Ver bloque</CardDescription>
+                    </CardHeader>
+                  </Card>
+                </a>
+              )
+            })}
+          </div>
+        </div>
+      ) : null}
+
       {page && (
         <div className="prose max-w-none mb-12">
           {page.sections.map((section) => {
+            const sectionTitle = section.title?.trim()
+            const anchorId = sectionTitle ? slugify(sectionTitle) : undefined
+
+            // Card grid sections (e.g., ITS más comunes)
+            if (section.type === 'CARD_GRID') {
+              let items: StiItem[] = []
+              if (section.metadata) {
+                try {
+                  const metadata = typeof section.metadata === 'string'
+                    ? JSON.parse(section.metadata)
+                    : section.metadata
+                  if (Array.isArray(metadata.items)) {
+                    items = metadata.items as StiItem[]
+                  }
+                } catch (e) {
+                  // ignore parsing errors
+                }
+              }
+
+              return (
+                <section key={section.id} className="mb-10 scroll-mt-24">
+                  {sectionTitle && (
+                    <h2 id={anchorId} className="text-2xl font-semibold mb-4">
+                      {sectionTitle}
+                    </h2>
+                  )}
+                  <StiCardGrid items={items} />
+                </section>
+              )
+            }
+
             // Check if section is FAQ/Accordion type
             if (section.type === 'FAQ' || section.type === 'ACCORDION') {
               let faqItems: Array<{ question: string; answer: string }> = []
@@ -53,9 +122,11 @@ export default async function LearnPage() {
               }
 
               return (
-                <div key={section.id} className="mb-8">
-                  {section.title && (
-                    <h2 className="text-2xl font-semibold mb-4">{section.title}</h2>
+                <section key={section.id} className="mb-10 scroll-mt-24">
+                  {sectionTitle && (
+                    <h2 id={anchorId} className="text-2xl font-semibold mb-4">
+                      {sectionTitle}
+                    </h2>
                   )}
                   {faqItems.length > 0 ? (
                     <AccordionSection items={faqItems} type={section.type === 'FAQ' ? 'single' : 'multiple'} />
@@ -65,21 +136,23 @@ export default async function LearnPage() {
                       dangerouslySetInnerHTML={{ __html: section.content }}
                     />
                   )}
-                </div>
+                </section>
               )
             }
 
             // Regular content section
             return (
-              <div key={section.id} className="mb-8">
-                {section.title && (
-                  <h2 className="text-2xl font-semibold mb-4">{section.title}</h2>
+              <section key={section.id} className="mb-10 scroll-mt-24">
+                {sectionTitle && (
+                  <h2 id={anchorId} className="text-2xl font-semibold mb-4">
+                    {sectionTitle}
+                  </h2>
                 )}
                 <div 
                   className="text-muted-foreground"
                   dangerouslySetInnerHTML={{ __html: section.content }}
                 />
-              </div>
+              </section>
             )
           })}
         </div>
