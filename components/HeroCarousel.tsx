@@ -76,8 +76,8 @@ export function HeroCarousel({ slides }: HeroCarouselProps) {
             />
           )}
           {/* Subtle overlay for text readability, not full green background */}
-          <div className="absolute inset-0 bg-black/20 flex items-center justify-center">
-            <div className="text-center text-white px-4 max-w-3xl z-10">
+          <div className="absolute inset-0 bg-black/20 flex items-center justify-center pointer-events-none">
+            <div className="text-center text-white px-4 max-w-3xl z-10 pointer-events-auto">
               <h1 className="text-3xl md:text-5xl font-bold mb-6 drop-shadow-lg">
                 {slide.title}
               </h1>
@@ -99,15 +99,17 @@ export function HeroCarousel({ slides }: HeroCarouselProps) {
       {activeSlides.length > 1 && (
         <>
           <button
+            type="button"
             onClick={goToPrevious}
-            className="absolute left-4 top-1/2 -translate-y-1/2 bg-primary/80 hover:bg-primary text-white p-2 rounded-full transition-colors shadow-lg backdrop-blur-sm"
+            className="absolute left-4 top-1/2 -translate-y-1/2 bg-primary/80 hover:bg-primary text-white p-2 rounded-full transition-colors shadow-lg backdrop-blur-sm z-20"
             aria-label="Slide anterior"
           >
             <ChevronLeft className="h-6 w-6" />
           </button>
           <button
+            type="button"
             onClick={goToNext}
-            className="absolute right-4 top-1/2 -translate-y-1/2 bg-primary/80 hover:bg-primary text-white p-2 rounded-full transition-colors shadow-lg backdrop-blur-sm"
+            className="absolute right-4 top-1/2 -translate-y-1/2 bg-primary/80 hover:bg-primary text-white p-2 rounded-full transition-colors shadow-lg backdrop-blur-sm z-20"
             aria-label="Slide siguiente"
           >
             <ChevronRight className="h-6 w-6" />
