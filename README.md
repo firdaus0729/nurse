@@ -136,6 +136,81 @@ SMTP_TO_NURSES=enfermera1@example.com,enfermera2@example.com
 
 **Nota**: Para Gmail, necesitarás generar una "App Password" en tu cuenta de Google.
 
+## Solución de problemas: base de datos (Neon)
+
+Si ves **"Can't reach database server"** o **"Database connection error"** al usar Neon, sigue estos pasos **en este orden**:
+
+### 1. Probar la conexión
+
+```bash
+npm run db:test
+```
+
+- Si aparece **"✅ Connection successful"**: la base de datos responde. Puedes seguir con `npm run db:seed` y `npm run dev`.
+- Si aparece **"❌ Connection failed"**: continúa con los pasos siguientes.
+
+### 2. Reactivar el proyecto en Neon
+
+Neon **pausa** las bases de datos inactivas. Hay que reactivarlas:
+
+1. Abre [Neon Console](https://console.neon.tech).
+2. Entra en tu **proyecto** (ej. `ep-orange-bread-...`).
+3. Si está en pausa, pulsa **Resume** / **Reactivate**.
+4. Espera unos segundos y vuelve a ejecutar:
+
+```bash
+npm run db:test
+```
+
+### 3. Comprobar `DATABASE_URL` en `.env`
+
+1. En Neon Console → tu proyecto → **Connection details**.
+2. Copia la **Connection string** (pooler o directa).
+3. Pega en `.env`:
+
+```env
+DATABASE_URL="postgresql://USER:PASSWORD@HOST/DB?sslmode=require"
+```
+
+- Debe incluir **`?sslmode=require`** (y a veces `&channel_binding=require`).
+- No dejes espacios ni comillas extra alrededor del valor.
+
+Luego:
+
+```bash
+npm run db:test
+```
+
+### 4. Usar conexión directa si la pooler falla
+
+Si la **pooler** (`...-pooler....neon.tech`) sigue sin conectar:
+
+1. En Neon → **Connection details** → elige **Direct connection** (no pooled).
+2. Copia esa URL y úsala como `DATABASE_URL` en `.env`.
+3. Vuelve a ejecutar:
+
+```bash
+npm run db:test
+```
+
+### 5. Comandos útiles una vez conecta
+
+```bash
+npx prisma generate
+npx prisma db push
+npm run db:seed
+npm run dev
+```
+
+- **`npm run db:test`**: comprobar que la base de datos responde.
+- **`npx prisma db push`**: crear/actualizar tablas.
+- **`npm run db:seed`**: cargar datos iniciales (cuídate, carrusel, etc.).
+- **`npm run dev`**: arrancar la app.
+
+### 6. Si la app sigue sin base de datos
+
+Cuando la base de datos no está disponible, la **home** usa datos de respaldo (carrusel, etc.) y **Cuídate** muestra un aviso con enlace para volver al inicio, en lugar de romper la app.
+
 ## Despliegue
 
 ### Vercel

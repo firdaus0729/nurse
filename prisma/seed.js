@@ -487,6 +487,406 @@ async function main() {
 
   console.log('✅ Created content for \"Infórmate\" page')
 
+  // Create \"Cuídate\" page with care prevention cards
+  const takeCarePage = await prisma.page.upsert({
+    where: { slug: 'take-care' },
+    update: {},
+    create: {
+      slug: 'take-care',
+      title: 'Cuídate',
+      content: '<p>Información y recursos para cuidarte y prevenir.</p>',
+      isPublished: true,
+    },
+  })
+
+  // Reset existing sections for Cuídate
+  await prisma.section.deleteMany({
+    where: { pageId: takeCarePage.id },
+  })
+
+  // Create Cuídate cards section with all 6 care topics
+  await prisma.section.create({
+    data: {
+      pageId: takeCarePage.id,
+      title: 'Métodos de cuidado y prevención',
+      order: 0,
+      type: 'CARD_GRID',
+      content: '',
+      metadata: {
+        items: [
+          {
+            key: 'metodos-prevencion',
+            title: 'MÉTODOS DE PREVENCIÓN',
+            briefDescription: 'Prevenir no va de tener miedo. Va de tener información y opciones para decidir cómo cuidarte.',
+            imageUrl: '/cuídate/prevencion.jpg',
+            fullContent: `
+<p>Prevenir no va de tener miedo. Va de tener información y opciones para decidir cómo cuidarte.</p>
+
+<p>No existe un único método perfecto para todo. Cada práctica tiene formas distintas de reducir el riesgo.</p>
+
+<h4>¿Qué entendemos por prevención?</h4>
+<p>La prevención en salud sexual incluye todas aquellas medidas que ayudan a:</p>
+<ul>
+  <li>Reducir el riesgo de contraer una ITS.</li>
+  <li>Proteger tu salud y la de la otra persona.</li>
+  <li>Tomar decisiones más seguras y conscientes.</li>
+</ul>
+
+<p><strong>Prevenir no significa dejar de disfrutar, significa disfrutar con cuidado.</strong></p>
+
+<h4>Métodos que ayudan a prevenir las ITS</h4>
+
+<h5>🔹 Métodos de barrera</h5>
+<p>Son los más conocidos y eficaces para reducir el riesgo de ITS.</p>
+<p>Incluyen:</p>
+<ul>
+  <li>Preservativo externo.</li>
+  <li>Preservativo interno.</li>
+  <li>Barreras de látex para sexo oral.</li>
+</ul>
+<p><strong>👉 Reducen mucho el riesgo cuando se usan correctamente.</strong></p>
+
+<h5>🔹 Vacunación</h5>
+<p>Algunas infecciones se pueden prevenir con vacunas, como el virus del papiloma humano (VPH) o la hepatitis B.</p>
+<p>La vacunación es una forma de protección a largo plazo. No sustituye al preservativo, pero lo complementa.</p>
+
+<h5>🔹 Pruebas diagnósticas</h5>
+<p>Hacerse pruebas forma parte de la prevención.</p>
+<ul>
+  <li>Muchas ITS no dan síntomas.</li>
+  <li>Saber si tienes una infección te permite tratarla a tiempo.</li>
+  <li>También protege a las personas con las que te relacionas.</li>
+</ul>
+<p><strong>👉 Hacerse pruebas es una decisión responsable.</strong></p>
+
+<h5>🔹 Información y toma de decisiones</h5>
+<p>Conocer los riesgos de cada práctica ayuda a decidir mejor.</p>
+<ul>
+  <li>No todas las prácticas tienen el mismo riesgo.</li>
+  <li>El consumo de alcohol u otras sustancias puede influir en tus decisiones.</li>
+  <li>Parar, pensar y hablarlo también es prevención.</li>
+</ul>
+
+<h4>Lo que NO es prevención</h4>
+<ul>
+  <li>Confiar solo en "conocer bien" a la otra persona.</li>
+  <li>Pensar que "si no hay síntomas, no pasa nada".</li>
+  <li>Creer que solo existe riesgo en relaciones con penetración.</li>
+</ul>
+<p><strong>👉 Los mitos no protegen. La información sí.</strong></p>
+
+<h4>Un mensaje importante</h4>
+<p>Prevenir no es una obligación impuesta desde fuera.<br>
+Es una elección personal basada en el cuidado y el respeto.</p>
+<p><strong>Cuidarte es informarte, decidir y protegerte.</strong></p>
+            `.trim(),
+          },
+          {
+            key: 'preservativo-externo-interno',
+            title: 'PRESERVATIVO EXTERNO E INTERNO',
+            briefDescription: 'El preservativo es uno de los métodos más eficaces para prevenir las ITS. Cuando se usa bien, reduce mucho el riesgo y protege a todas las personas implicadas.',
+            imageUrl: '/cuídate/preservativo.jpg',
+            fullContent: `
+<p>El preservativo es uno de los métodos más eficaces para prevenir las ITS.<br>
+Cuando se usa bien, reduce mucho el riesgo y protege a todas las personas implicadas.</p>
+
+<p>Existen dos tipos principales: preservativo externo y preservativo interno.<br>
+Ambos funcionan. La elección depende de la situación y de la persona.</p>
+
+<h4>Preservativo externo</h4>
+<p>Es el más conocido.</p>
+<ul>
+  <li>Se coloca sobre el pene.</li>
+  <li>Protege frente a la mayoría de las ITS.</li>
+  <li>También previene embarazos no deseados.</li>
+  <li>Es fácil de conseguir y usar.</li>
+</ul>
+<p><strong>👉 Funciona mejor cuando:</strong></p>
+<ul>
+  <li>Se usa desde el inicio de la relación sexual.</li>
+  <li>Se coloca correctamente.</li>
+  <li>Se utiliza uno nuevo en cada relación.</li>
+</ul>
+
+<h4>Preservativo interno</h4>
+<p>Es menos conocido, pero igual de válido.</p>
+<ul>
+  <li>Se coloca dentro de la vagina o el ano.</li>
+  <li>Da más control a quien lo usa.</li>
+  <li>Puede colocarse antes de la relación sexual.</li>
+  <li>También protege frente a ITS y embarazos.</li>
+</ul>
+<p><strong>👉 Es una buena opción si:</strong></p>
+<ul>
+  <li>No puedes usar preservativo externo.</li>
+  <li>Quieres tener más autonomía sobre la protección.</li>
+  <li>Buscas una alternativa igual de segura.</li>
+</ul>
+
+<h4>Errores comunes que reducen la protección</h4>
+<p>Algunos fallos son más habituales de lo que parece:</p>
+<ul>
+  <li>Colocarlo tarde.</li>
+  <li>No dejar espacio en la punta.</li>
+  <li>Usar dos a la vez.</li>
+  <li>Reutilizarlo.</li>
+  <li>Usarlo después de haber consumido alcohol u otras sustancias sin prestar atención.</li>
+</ul>
+<p><strong>👉 Estos errores no significan irresponsabilidad, solo falta de información.</strong></p>
+
+<h4>¿Y el placer?</h4>
+<p>El preservativo no elimina el placer.</p>
+<ul>
+  <li>Existen distintos tamaños, materiales y texturas.</li>
+  <li>Usar lubricante puede mejorar la experiencia.</li>
+  <li>Sentirte seguro/a también influye en cómo disfrutas.</li>
+</ul>
+<p><strong>👉 Cuidarte también forma parte del disfrute.</strong></p>
+
+<h4>Un mensaje importante</h4>
+<p>Usar preservativo no es desconfianza.<br>
+Es respeto, cuidado y responsabilidad compartida.</p>
+<p><strong>Protegerte es una decisión que habla bien de ti.</strong></p>
+            `.trim(),
+          },
+          {
+            key: 'barreras-latex',
+            title: 'BARRERAS DE LÁTEX',
+            briefDescription: 'Las barreras de látex son un método de protección poco conocido, pero muy útil para reducir el riesgo de ITS, especialmente durante el sexo oral. Que no se hable mucho de ellas no significa que no sean importantes.',
+            imageUrl: '/cuídate/barreras.jpg',
+            fullContent: `
+<p>Las barreras de látex son un método de protección poco conocido, pero muy útil para reducir el riesgo de ITS, especialmente durante el sexo oral.</p>
+
+<p>Que no se hable mucho de ellas no significa que no sean importantes.</p>
+
+<h4>¿Qué son las barreras de látex?</h4>
+<p>Son láminas finas de látex que se colocan entre la boca y los genitales o el ano durante el sexo oral.</p>
+<ul>
+  <li>Actúan como una barrera física.</li>
+  <li>Evitan el contacto directo con fluidos y mucosas.</li>
+  <li>Reducen el riesgo de transmisión de ITS.</li>
+</ul>
+<p><strong>👉 Funcionan de forma similar al preservativo, pero adaptadas al sexo oral.</strong></p>
+
+<h4>¿Cuándo se recomienda usarlas?</h4>
+<p>Las barreras de látex son especialmente útiles en:</p>
+<ul>
+  <li>Sexo oral en vagina.</li>
+  <li>Sexo oral en ano.</li>
+  <li>Prácticas donde hay contacto directo boca-genital o boca-ano.</li>
+</ul>
+<p>Aunque muchas personas no lo sepan, el sexo oral también puede transmitir ITS.</p>
+
+<h4>¿Por qué casi no se usan?</h4>
+<p>Principalmente por:</p>
+<ul>
+  <li>Falta de información.</li>
+  <li>Poca visibilidad en educación sexual.</li>
+  <li>Creencia de que el sexo oral "no tiene riesgo".</li>
+  <li>Vergüenza o desconocimiento sobre cómo usarlas.</li>
+</ul>
+<p><strong>👉 No usarlas no es un fallo personal. Es una falta de información general.</strong></p>
+
+<h4>¿Cómo se usan?</h4>
+<ul>
+  <li>Se coloca la barrera cubriendo la zona genital o anal.</li>
+  <li>Se mantiene durante toda la práctica.</li>
+  <li>Se utiliza una barrera nueva en cada relación.</li>
+  <li>Puede usarse lubricante para mayor comodidad.</li>
+</ul>
+<p><strong>👉 Son fáciles de usar cuando sabes que existen.</strong></p>
+
+<h4>Alternativas</h4>
+<p>Si no tienes una barrera de látex:</p>
+<ul>
+  <li>Un preservativo externo cortado puede cumplir la misma función.</li>
+  <li>Es importante que sea nuevo y sin usar.</li>
+</ul>
+
+<h4>Un mensaje importante</h4>
+<p>Protegerse en el sexo oral también es cuidarse.<br>
+No hace que la experiencia sea menos válida ni menos íntima.</p>
+<p><strong>La información te da más opciones para decidir cómo cuidarte.</strong></p>
+            `.trim(),
+          },
+          {
+            key: 'vacunacion',
+            title: 'Vacunación',
+            briefDescription: 'Vacunarse también es una forma de cuidarte. En salud sexual, la vacunación ayuda a prevenir infecciones antes de que aparezcan. No sustituye a otros métodos de prevención, pero los complementa.',
+            imageUrl: '/cuídate/vacunacion.jpg',
+            fullContent: `
+<p>Vacunarse también es una forma de cuidarte.<br>
+En salud sexual, la vacunación ayuda a prevenir infecciones antes de que aparezcan.</p>
+
+<p>No sustituye a otros métodos de prevención, pero los complementa.</p>
+
+<h4>¿Qué tiene que ver la vacunación con la salud sexual?</h4>
+<p>Algunas infecciones de transmisión sexual se pueden prevenir con vacunas.<br>
+Las más conocidas son:</p>
+<ul>
+  <li>Virus del Papiloma Humano (VPH)</li>
+  <li>Hepatitis B</li>
+</ul>
+<p>Estas infecciones pueden tener consecuencias a largo plazo si no se previenen o controlan.</p>
+
+<h4>Vacunarse no es solo "cosa de infancia"</h4>
+<p>Muchas personas piensan que la vacunación solo es importante cuando somos pequeños/as.<br>
+En realidad, la vacunación sigue siendo clave en la adolescencia y juventud.</p>
+<ul>
+  <li>Aunque ya hayas tenido relaciones sexuales, la vacuna sigue siendo útil.</li>
+  <li>Protege frente a tipos de virus que quizás no has tenido.</li>
+  <li>Ayuda a reducir riesgos futuros.</li>
+</ul>
+<p><strong>👉 Nunca es "demasiado tarde" para informarte.</strong></p>
+
+<h4>¿La vacuna sustituye al preservativo?</h4>
+<p>No.</p>
+<ul>
+  <li>La vacunación no protege frente a todas las ITS.</li>
+  <li>El preservativo sigue siendo fundamental.</li>
+</ul>
+<p><strong>👉 La mejor prevención es combinar métodos: información, protección y vacunación.</strong></p>
+
+<h4>Dudas frecuentes sobre la vacunación</h4>
+<p>Es normal tener preguntas:</p>
+<ul>
+  <li>¿Es segura?</li>
+  <li>¿Tiene efectos secundarios?</li>
+  <li>¿Dónde puedo vacunarme?</li>
+  <li>¿Está incluida en el sistema público?</li>
+</ul>
+<p><strong>👉 Resolver dudas también forma parte del autocuidado.</strong><br>
+Hablar con profesionales de salud te ayuda a decidir con tranquilidad.</p>
+
+<h4>Un mensaje importante</h4>
+<p>Vacunarte es una decisión personal, informada y responsable.<br>
+No tiene que ver con miedo, sino con pensar en tu salud presente y futura.</p>
+<p><strong>Cuidarte hoy también es cuidar de tu futuro.</strong></p>
+            `.trim(),
+          },
+          {
+            key: 'pruebas-diagnosticas',
+            title: 'PRUEBAS DIAGNÓSTICAS',
+            briefDescription: 'Hacerse pruebas también es cuidarse. No es una señal de desconfianza ni de irresponsabilidad. Es una decisión consciente sobre tu salud.',
+            imageUrl: '/cuídate/pruebas.jpg',
+            fullContent: `
+<p>Hacerse pruebas también es cuidarse.<br>
+No es una señal de desconfianza ni de irresponsabilidad.<br>
+Es una decisión consciente sobre tu salud.</p>
+
+<p>Muchas ITS no dan síntomas, así que la única forma de saberlo es mediante una prueba.</p>
+
+<h4>¿Cuándo es recomendable hacerse una prueba?</h4>
+<p>Puede ser buena idea hacerte una prueba si:</p>
+<ul>
+  <li>Has tenido relaciones sexuales sin protección.</li>
+  <li>Has cambiado de pareja o tienes varias parejas.</li>
+  <li>Has tenido una relación ocasional.</li>
+  <li>Has consumido alcohol u otras sustancias y no recuerdas bien la situación.</li>
+  <li>Tienes síntomas o molestias.</li>
+  <li>Simplemente quieres quedarte tranquilo/a.</li>
+</ul>
+<p><strong>👉 No hace falta esperar a "notar algo".</strong></p>
+
+<h4>¿Qué tipo de pruebas existen?</h4>
+<p>Las pruebas pueden variar según la ITS:</p>
+<ul>
+  <li>Análisis de sangre.</li>
+  <li>Muestras de orina.</li>
+  <li>Exudados (muestras locales).</li>
+  <li>Pruebas rápidas en algunos casos.</li>
+</ul>
+<p>Un profesional sanitario te indicará cuál es la más adecuada según tu situación.</p>
+
+<h4>Confidencialidad y privacidad</h4>
+<p>Las pruebas se realizan de forma confidencial.</p>
+<ul>
+  <li>Tu información está protegida.</li>
+  <li>Nadie tiene por qué saberlo si tú no quieres.</li>
+  <li>Puedes preguntar todas tus dudas sin juicio.</li>
+</ul>
+<p><strong>👉 La confidencialidad es un derecho.</strong></p>
+
+<h4>¿Y si el resultado es positivo?</h4>
+<p>Un resultado positivo no define quién eres.</p>
+<ul>
+  <li>Muchas ITS tienen tratamiento.</li>
+  <li>Otras se pueden controlar con seguimiento médico.</li>
+  <li>Detectarlas a tiempo evita complicaciones.</li>
+</ul>
+<p><strong>👉 Saberlo te permite cuidarte mejor y cuidar a otras personas.</strong></p>
+
+<h4>Un mensaje importante</h4>
+<p>Hacerse pruebas no es exagerar ni preocuparse de más.<br>
+Es una forma de responsabilizarte de tu bienestar.</p>
+<p><strong>Cuidarte también es informarte y comprobar.</strong></p>
+            `.trim(),
+          },
+          {
+            key: 'consentimiento',
+            title: 'CONSENTIMIENTO',
+            briefDescription: 'El consentimiento es la base de cualquier relación sana. Sin consentimiento, no hay sexo ni relación saludable. No es algo complicado ni ambiguo. Es una cuestión de respeto y cuidado mutuo.',
+            imageUrl: '/cuídate/consentimiento.jpg',
+            fullContent: `
+<p>El consentimiento es la base de cualquier relación sana.<br>
+Sin consentimiento, no hay sexo ni relación saludable.</p>
+
+<p>No es algo complicado ni ambiguo.<br>
+Es una cuestión de respeto y cuidado mutuo.</p>
+
+<h4>¿Qué es el consentimiento?</h4>
+<p>El consentimiento es un sí claro, libre y consciente.</p>
+
+<p>Significa que todas las personas implicadas:</p>
+<ul>
+  <li>Quieren participar.</li>
+  <li>Entienden lo que está pasando.</li>
+  <li>Se sienten cómodas con la situación.</li>
+</ul>
+<p><strong>👉 El silencio, la duda o la presión no son consentimiento.</strong></p>
+
+<h4>El consentimiento debe ser…</h4>
+<ul>
+  <li><strong>Libre:</strong> sin presión, chantaje ni insistencia.</li>
+  <li><strong>Claro:</strong> no vale "supongo", "bueno…" o "si no dices que no".</li>
+  <li><strong>Continuo:</strong> se puede cambiar de opinión en cualquier momento.</li>
+  <li><strong>Mutuo:</strong> todas las personas cuentan por igual.</li>
+</ul>
+<p><strong>👉 Decir "no" o cambiar de idea es siempre válido.</strong></p>
+
+<h4>Consentimiento y consumo de sustancias</h4>
+<p>El alcohol u otras sustancias pueden afectar:</p>
+<ul>
+  <li>A la capacidad de decidir.</li>
+  <li>A la percepción de lo que se quiere o no.</li>
+  <li>A la comunicación clara.</li>
+</ul>
+<p><strong>👉 Si alguien no puede decidir con claridad, no hay consentimiento.</strong></p>
+
+<h4>Mitos frecuentes sobre el consentimiento</h4>
+<ul>
+  <li><strong>"Si ya habíamos empezado, no podía parar"</strong> ❌</li>
+  <li><strong>"Si no dijo que no, es que sí"</strong> ❌</li>
+  <li><strong>"Si es mi pareja, no hace falta preguntar"</strong> ❌</li>
+</ul>
+<p><strong>👉 El consentimiento no se da una vez para siempre.</strong></p>
+
+<h4>Un mensaje importante</h4>
+<p>El consentimiento no quita espontaneidad.<br>
+Al contrario: genera confianza y seguridad.</p>
+
+<p>Hablar, preguntar y escuchar también forma parte de disfrutar.</p>
+
+<p><strong>Sin un sí claro, no es un sí.</strong></p>
+            `.trim(),
+          },
+        ],
+      },
+    },
+  })
+
+  console.log('✅ Created content for \"Cuídate\" page')
+
   console.log('🎉 Seeding completed!')
   console.log('\n📝 Default credentials:')
   console.log('   Admin: admin@benurse.com / admin123')
