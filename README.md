@@ -114,12 +114,19 @@ La aplicación estará disponible en `http://localhost:3000`
 - **Realidades**: Blog con artículos categorizados
 - **Chat anónimo**: Sistema de conversación asíncrona sin registro
 
-### Administración
+### Administración (enfermeras y admin)
 - **Dashboard**: Estadísticas y resumen
 - **Gestión de chat**: Responder conversaciones, cerrar hilos
-- **Gestión de carrusel**: Crear, editar, ordenar slides
-- **Gestión de accesos rápidos**: Tarjetas dinámicas con campañas
-- **Gestión de contenido**: Artículos, páginas, secciones
+- **Gestión de carrusel**: Crear, editar, eliminar slides (textos e imagen URL)
+- **Gestión de accesos rápidos**: Crear, editar, eliminar tarjetas
+- **Gestión de contenido**: Crear, editar, eliminar artículos (Realidades: historias reales, artículos, noticias, preguntas incómodas)
+
+Las **enfermeras** (y admin) pueden **subir y editar textos e imágenes** desde el panel `/admin`:
+- **Carrusel**: Título, subtítulo, imagen (URL), botón CTA y enlace.
+- **Accesos rápidos**: Título, descripción, enlace, campaña.
+- **Contenido (Realidades)**: Título, extracto, contenido (HTML), tipo (historia real / artículo / noticia / pregunta incómoda), categoría, imagen (URL), publicar/despublicar.
+
+Para **imágenes**, se usa **URL** (ej. Imgur, Google Drive enlace público). No hay subida directa de archivos.
 
 ## Configuración de Email
 

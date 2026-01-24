@@ -15,6 +15,7 @@ export default async function ArticlePage({
     slug: string
     excerpt: string | null
     content: string
+    imageUrl: string | null
     articleType: string
     category: { id: string; name: string; slug: string } | null
     tags: Array<{ id: string; name: string; slug: string }>
