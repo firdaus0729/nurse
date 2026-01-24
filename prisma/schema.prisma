@@ -65,18 +65,20 @@ model QuickAccessCard {
   @@index([order])
 }
 
-// Content categories
+// Content categories (Realidades: 4 sub-blocks)
 model Category {
   id          String   @id @default(cuid())
   name        String
   slug        String   @unique
   description String?
+  order       Int      @default(0) // Realidades block order
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
   
   articles    Article[]
   
   @@map("categories")
+  @@index([order])
 }
 
 // Tags for content
@@ -91,7 +93,15 @@ model Tag {
   @@map("tags")
 }
 
-// Articles/Blog posts
+// Article content types (Realidades: revista digital)
+enum ArticleType {
+  HISTORIA_REAL
+  ARTICULO
+  NOTICIA
+  PREGUNTA_INCOMODA
+}
+
+// Articles/Blog posts (Realidades: historias, artículos, noticias, preguntas incómodas)
 model Article {
   id          String   @id @default(cuid())
   title       String
@@ -99,6 +109,7 @@ model Article {
   excerpt     String?
   content     String   @db.Text
   imageUrl    String?
+  articleType ArticleType @default(ARTICULO)
   isPublished Boolean  @default(false)
   isFeatured  Boolean  @default(false)
   viewCount   Int      @default(0)
@@ -114,6 +125,8 @@ model Article {
   @@index([slug])
   @@index([isPublished, publishedAt])
   @@index([isFeatured])
+  @@index([articleType])
+  @@index([categoryId])
 }
 
 // Static pages

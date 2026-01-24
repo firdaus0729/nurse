@@ -14,3 +14,9 @@ export function formatDate(date: Date | string): string {
   })
 }
 
+export const ARTICLE_TYPE_LABELS: Record<string, string> = {
+  HISTORIA_REAL: 'Historia real',
+  ARTICULO: 'Artículo',
+  NOTICIA: 'Noticia',
+  PREGUNTA_INCOMODA: 'Pregunta incómoda',
+}

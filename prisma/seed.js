@@ -60,7 +60,188 @@ async function main() {
     },
   })
 
+  // Realidades: 4 categorías (revista digital / espacio exploratorio)
+  await prisma.category.upsert({
+    where: { slug: 'porno-sexualidad' },
+    update: { order: 0 },
+    create: {
+      name: 'Porno y sexualidad',
+      slug: 'porno-sexualidad',
+      description: 'Porno y sexualidad',
+      order: 0,
+    },
+  })
+  await prisma.category.upsert({
+    where: { slug: 'presion-social-expectativas-cuerpo' },
+    update: { order: 1 },
+    create: {
+      name: 'Presión social, expectativas y cuerpo',
+      slug: 'presion-social-expectativas-cuerpo',
+      description: 'Presión social, expectativas y cuerpo',
+      order: 1,
+    },
+  })
+  await prisma.category.upsert({
+    where: { slug: 'sustancias-chemsex-decisiones' },
+    update: { order: 2 },
+    create: {
+      name: 'Sustancias, chemsex y decisiones',
+      slug: 'sustancias-chemsex-decisiones',
+      description: 'Sustancias, chemsex y decisiones',
+      order: 2,
+    },
+  })
+  await prisma.category.upsert({
+    where: { slug: 'relaciones-consentimiento-limites' },
+    update: { order: 3 },
+    create: {
+      name: 'Relaciones, consentimiento y límites',
+      slug: 'relaciones-consentimiento-limites',
+      description: 'Relaciones, consentimiento y límites',
+      order: 3,
+    },
+  })
+
   console.log('✅ Created categories')
+
+  // Realidades: Historias reales, Artículos, Noticias, Preguntas incómodas
+  const catPresion = await prisma.category.findUnique({ where: { slug: 'presion-social-expectativas-cuerpo' } })
+  const catPorno = await prisma.category.findUnique({ where: { slug: 'porno-sexualidad' } })
+
+  const historiaContent = `
+<p>Nunca nadie me dijo directamente que mi cuerpo estaba mal.<br>Pero lo sentí muchas veces.</p>
+
+<p>En redes todo el mundo parece seguro, atractivo, perfecto.<br>Cuerpos sin marcas, sin granos, sin complejos.<br>Y vídeos donde todo el mundo disfruta siempre, sin dudas.</p>
+
+<p>Empecé a pensar que yo era rara.<br>Que algo en mí no encajaba.</p>
+
+<p>Cuando estaba con alguien, en vez de disfrutar, pensaba:<br>¿Me estaré moviendo bien?<br>¿Esto es lo que se supone que tengo que hacer?<br>¿Le gustará mi cuerpo así?</p>
+
+<p>A veces decía que sí cuando en realidad no estaba segura.<br>No porque quisiera, sino porque sentía que era lo que tocaba.<br>Como si hubiera un guion que todo el mundo conocía menos yo.</p>
+
+<p>Después me quedaba con una sensación rara.<br>No era culpa ni miedo.<br>Era más bien sentir que había hecho algo para encajar, no porque me apeteciera.</p>
+
+<p>Con el tiempo entendí que nadie habla de estas dudas.<br>Que muchas personas sienten lo mismo, pero nadie lo dice.<br>Que los cuerpos reales no se parecen a los de los vídeos.<br>Y que disfrutar no tiene una forma única.</p>
+
+<p>Ahora sé que mi cuerpo no está mal.<br>Lo que estaba mal era creer que tenía que cumplir expectativas que no eran mías.</p>
+
+<p>Decidir a mi ritmo también es cuidarme.</p>
+<p><em>Fdo. Anónimo</em></p>
+`.trim()
+
+  const articuloContent = `
+<p>El porno está en internet, en redes y en muchos móviles.<br>Verlo no te convierte en una mala persona.<br>El problema no es verlo, sino aprender de él.</p>
+
+<p>El porno no es educación sexual, pero muchas veces actúa como si lo fuera.</p>
+
+<h4>El porno muestra ficción, no realidad</h4>
+<p>El porno está hecho para entretener y generar impacto, no para mostrar cómo son las relaciones reales.</p>
+
+<p>Las escenas están preparadas.</p>
+<p>Los cuerpos están seleccionados.</p>
+<p>No se muestran dudas, nervios ni comunicación.</p>
+<p>Todo parece fácil, rápido y perfecto.</p>
+<p><strong>👉 En la vida real, el sexo no funciona así.</strong></p>
+
+<h4>Crea expectativas irreales sobre el cuerpo</h4>
+<p>El porno suele mostrar:</p>
+<ul>
+  <li>Cuerpos muy concretos.</li>
+  <li>Sin diversidad real.</li>
+  <li>Sin inseguridades ni complejos.</li>
+</ul>
+<p>Esto puede hacer que muchas personas piensen:</p>
+<p>"Mi cuerpo no es suficiente".</p>
+<p>"Debería verme de otra forma".</p>
+<p>"No encajo".</p>
+<p><strong>👉 Los cuerpos reales son variados. No hay un modelo único.</strong></p>
+
+<h4>Distorsiona la idea de placer</h4>
+<p>En muchos vídeos:</p>
+<ul>
+  <li>El placer parece automático.</li>
+  <li>Todo el mundo disfruta igual.</li>
+  <li>No hay espacio para parar, preguntar o cambiar de idea.</li>
+</ul>
+<p>En la realidad:</p>
+<ul>
+  <li>El placer es distinto para cada persona.</li>
+  <li>No siempre es inmediato.</li>
+  <li>Requiere comunicación y confianza.</li>
+</ul>
+
+<h4>Apenas habla de consentimiento</h4>
+<p>El consentimiento casi nunca aparece de forma clara en el porno.</p>
+<ul>
+  <li>No se muestra cómo se acuerdan las cosas.</li>
+  <li>No se habla de límites.</li>
+  <li>No se ve que alguien pueda decir "no".</li>
+</ul>
+<p><strong>👉 Sin consentimiento, no hay relación sana.</strong></p>
+
+<h4>¿Qué puedes hacer con esta información?</h4>
+<p>No se trata de prohibir ni de señalar.<br>Se trata de mirar con pensamiento crítico.</p>
+<ul>
+  <li>Saber que es ficción.</li>
+  <li>No compararte.</li>
+  <li>Hablar de dudas.</li>
+  <li>Informarte por otras vías.</li>
+</ul>
+
+<p>El sexo real se construye con respeto, comunicación y cuidado, no con guiones.</p>
+`.trim()
+
+  if (catPresion) {
+    await prisma.article.upsert({
+      where: { slug: 'pense-que-el-problema-era-mi-cuerpo' },
+      update: {
+        title: 'Pensé que el problema era mi cuerpo',
+        excerpt: 'Nunca nadie me dijo directamente que mi cuerpo estaba mal. Pero lo sentí muchas veces.',
+        content: historiaContent,
+        articleType: 'HISTORIA_REAL',
+        categoryId: catPresion.id,
+        isPublished: true,
+        publishedAt: new Date(),
+      },
+      create: {
+        title: 'Pensé que el problema era mi cuerpo',
+        slug: 'pense-que-el-problema-era-mi-cuerpo',
+        excerpt: 'Nunca nadie me dijo directamente que mi cuerpo estaba mal. Pero lo sentí muchas veces.',
+        content: historiaContent,
+        articleType: 'HISTORIA_REAL',
+        categoryId: catPresion.id,
+        isPublished: true,
+        publishedAt: new Date(),
+      },
+    })
+  }
+
+  if (catPorno) {
+    await prisma.article.upsert({
+      where: { slug: 'por-que-el-porno-distorsiona-expectativas' },
+      update: {
+        title: 'Por qué el porno distorsiona expectativas',
+        excerpt: 'El porno está en internet, en redes y en muchos móviles. Verlo no te convierte en una mala persona. El problema no es verlo, sino aprender de él.',
+        content: articuloContent,
+        articleType: 'ARTICULO',
+        categoryId: catPorno.id,
+        isPublished: true,
+        publishedAt: new Date(),
+      },
+      create: {
+        title: 'Por qué el porno distorsiona expectativas',
+        slug: 'por-que-el-porno-distorsiona-expectativas',
+        excerpt: 'El porno está en internet, en redes y en muchos móviles. Verlo no te convierte en una mala persona. El problema no es verlo, sino aprender de él.',
+        content: articuloContent,
+        articleType: 'ARTICULO',
+        categoryId: catPorno.id,
+        isPublished: true,
+        publishedAt: new Date(),
+      },
+    })
+  }
+
+  console.log('✅ Created Realidades content (historias, artículos)')
 
   // Create carousel slides with images from /public
   // Slide 1: Chat anónimo

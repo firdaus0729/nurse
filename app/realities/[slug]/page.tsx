@@ -1,30 +1,53 @@
+import Link from 'next/link'
 import { prisma } from '@/lib/prisma'
 import { notFound } from 'next/navigation'
-import { formatDate } from '@/lib/utils'
-import Link from 'next/link'
+import { formatDate, ARTICLE_TYPE_LABELS } from '@/lib/utils'
+import { Badge } from '@/components/ui/badge'
 
 export default async function ArticlePage({
   params,
 }: {
   params: { slug: string }
 }) {
-  const article = await prisma.article.findUnique({
-    where: { slug: params.slug },
-    include: {
-      category: true,
-      tags: true,
-    },
-  })
+  let article: {
+    id: string
+    title: string
+    slug: string
+    excerpt: string | null
+    content: string
+    articleType: string
+    category: { id: string; name: string; slug: string } | null
+    tags: Array<{ id: string; name: string; slug: string }>
+    publishedAt: Date | null
+    isPublished: boolean
+  } | null = null
+
+  try {
+    article = await prisma.article.findUnique({
+      where: { slug: params.slug },
+      include: {
+        category: true,
+        tags: true,
+      },
+    })
+  } catch (e) {
+    console.error('Database connection error:', e)
+  }
 
   if (!article || !article.isPublished) {
     notFound()
   }
 
-  // Increment view count
-  await prisma.article.update({
-    where: { id: article.id },
-    data: { viewCount: { increment: 1 } },
-  })
+  try {
+    await prisma.article.update({
+      where: { id: article.id },
+      data: { viewCount: { increment: 1 } },
+    })
+  } catch {
+    // ignore view-count errors
+  }
+
+  const typeLabel = ARTICLE_TYPE_LABELS[article.articleType] ?? article.articleType
 
   return (
     <div className="container py-8 max-w-4xl">
@@ -43,28 +66,29 @@ export default async function ArticlePage({
       )}
 
       <article>
-        <h1 className="text-4xl font-bold mb-4">{article.title}</h1>
-        
-        <div className="flex flex-wrap gap-4 mb-6 text-sm text-muted-foreground">
+        <div className="flex flex-wrap items-center gap-2 mb-3">
+          <Badge variant="secondary">{typeLabel}</Badge>
           {article.publishedAt && (
-            <span>{formatDate(article.publishedAt)}</span>
+            <span className="text-sm text-muted-foreground">{formatDate(article.publishedAt)}</span>
           )}
           {article.category && (
             <Link
               href={`/realities?category=${article.category.slug}`}
-              className="hover:text-primary"
+              className="text-sm text-primary hover:underline"
             >
               {article.category.name}
             </Link>
           )}
         </div>
 
+        <h1 className="text-4xl font-bold mb-4">{article.title}</h1>
+
         {article.excerpt && (
           <p className="text-xl text-muted-foreground mb-8">{article.excerpt}</p>
         )}
 
         <div
-          className="prose max-w-none"
+          className="prose max-w-none prose-p:leading-relaxed prose-ul:my-4 prose-li:my-1"
           dangerouslySetInnerHTML={{ __html: article.content }}
         />
 
@@ -88,4 +112,3 @@ export default async function ArticlePage({
     </div>
   )
 }
-
