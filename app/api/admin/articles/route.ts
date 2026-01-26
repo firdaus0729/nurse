@@ -5,14 +5,23 @@ import { prisma } from '@/lib/prisma'
 
 export const dynamic = 'force-dynamic'
 
-export async function GET() {
+export async function GET(request: NextRequest) {
   try {
     const session = await getServerSession(authOptions)
     if (!session) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
+    const { searchParams } = new URL(request.url)
+    const categoryId = searchParams.get('categoryId')
+
+    const where: any = {}
+    if (categoryId) {
+      where.categoryId = categoryId
+    }
+
     const articles = await prisma.article.findMany({
+      where,
       include: { category: true, tags: true },
       orderBy: { createdAt: 'desc' },
     })
