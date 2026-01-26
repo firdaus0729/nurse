@@ -31,15 +31,24 @@ export function ImageUpload({ value, onChange, disabled }: ImageUploadProps) {
         body: formData,
       })
 
-      if (!res.ok) {
-        const data = await res.json()
-        throw new Error(data.error || 'Error al subir la imagen')
+      let data
+      try {
+        data = await res.json()
+      } catch (parseError) {
+        throw new Error(`Error del servidor: ${res.status} ${res.statusText}`)
       }
 
-      const data = await res.json()
+      if (!res.ok) {
+        throw new Error(data.error || `Error al subir la imagen (${res.status})`)
+      }
+
       onChange(data.url)
+      setError('') // Clear any previous errors
     } catch (err: any) {
-      setError(err.message || 'Error al subir la imagen')
+      console.error('Upload error:', err)
+      const errorMessage = err.message || 'Error al subir la imagen'
+      setError(errorMessage)
+      alert(`Error: ${errorMessage}`) // Also show alert for debugging
     } finally {
       setUploading(false)
       // Reset input

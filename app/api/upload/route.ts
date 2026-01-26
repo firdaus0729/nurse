@@ -14,7 +14,7 @@ export async function POST(request: NextRequest) {
     }
 
     const formData = await request.formData()
-    const file = formData.get('file') as File
+    const file = formData.get('file') as File | null
 
     if (!file) {
       return NextResponse.json({ error: 'No file provided' }, { status: 400 })
@@ -24,7 +24,7 @@ export async function POST(request: NextRequest) {
     const validTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp', 'image/gif']
     if (!validTypes.includes(file.type)) {
       return NextResponse.json(
-        { error: 'Invalid file type. Only images are allowed.' },
+        { error: `Invalid file type: ${file.type}. Only images are allowed.` },
         { status: 400 }
       )
     }
@@ -33,7 +33,7 @@ export async function POST(request: NextRequest) {
     const maxSize = 5 * 1024 * 1024 // 5MB
     if (file.size > maxSize) {
       return NextResponse.json(
-        { error: 'File too large. Maximum size is 5MB.' },
+        { error: `File too large: ${(file.size / 1024 / 1024).toFixed(2)}MB. Maximum size is 5MB.` },
         { status: 400 }
       )
     }
@@ -45,8 +45,12 @@ export async function POST(request: NextRequest) {
     const uploadDir = join(process.cwd(), 'public', 'upload')
     try {
       await mkdir(uploadDir, { recursive: true })
-    } catch (error) {
-      // Directory might already exist, ignore
+    } catch (mkdirError: any) {
+      console.error('Error creating upload directory:', mkdirError)
+      return NextResponse.json(
+        { error: `Failed to create upload directory: ${mkdirError.message}` },
+        { status: 500 }
+      )
     }
 
     // Generate unique filename
@@ -57,14 +61,27 @@ export async function POST(request: NextRequest) {
     const filepath = join(uploadDir, filename)
 
     // Write file
-    await writeFile(filepath, buffer)
+    try {
+      await writeFile(filepath, buffer)
+      console.log(`Upload: File written successfully to ${filepath}`)
+    } catch (writeError: any) {
+      console.error('Error writing file:', writeError)
+      return NextResponse.json(
+        { error: `Failed to write file: ${writeError.message}` },
+        { status: 500 }
+      )
+    }
 
     // Return public URL (relative to public folder)
     const publicUrl = `/upload/${filename}`
+    console.log(`Upload: Success! URL: ${publicUrl}`)
 
     return NextResponse.json({ url: publicUrl, filename })
-  } catch (error) {
+  } catch (error: any) {
     console.error('Error uploading file:', error)
-    return NextResponse.json({ error: 'Failed to upload file' }, { status: 500 })
+    return NextResponse.json(
+      { error: `Failed to upload file: ${error.message || 'Unknown error'}` },
+      { status: 500 }
+    )
   }
 }
