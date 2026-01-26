@@ -12,6 +12,7 @@ import {
   Image as ImageIcon,
   Grid3x3,
   FileText,
+  Heart,
   LogOut,
 } from 'lucide-react'
 
@@ -21,6 +22,7 @@ const adminNavItems = [
   { href: '/admin/carousel', label: 'Carrusel', icon: ImageIcon },
   { href: '/admin/quick-access', label: 'Accesos rápidos', icon: Grid3x3 },
   { href: '/admin/content', label: 'Contenido', icon: FileText },
+  { href: '/admin/cuidate', label: 'Cuídate', icon: Heart },
 ]
 
 export function AdminNav() {

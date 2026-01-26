@@ -8,8 +8,13 @@ export default withAuth(
   {
     callbacks: {
       authorized: ({ token, req }) => {
-        // Protect admin routes
+        // Protect admin routes, but allow access to login page
         if (req.nextUrl.pathname.startsWith('/admin')) {
+          // Allow access to login page without authentication
+          if (req.nextUrl.pathname === '/admin/login') {
+            return true
+          }
+          // All other admin routes require authentication
           return !!token
         }
         return true
@@ -20,5 +25,7 @@ export default withAuth(
 
 export const config = {
   matcher: ['/admin/:path*'],
+  // Exclude login page from middleware
+  // The matcher will still catch it, but we handle it in the callback
 }
 
