@@ -41,10 +41,10 @@ export async function POST(request: NextRequest) {
     const bytes = await file.arrayBuffer()
     const buffer = Buffer.from(bytes)
 
-    // Create uploads directory if it doesn't exist
-    const uploadsDir = join(process.cwd(), 'public', 'uploads')
+    // Create upload directory if it doesn't exist
+    const uploadDir = join(process.cwd(), 'public', 'upload')
     try {
-      await mkdir(uploadsDir, { recursive: true })
+      await mkdir(uploadDir, { recursive: true })
     } catch (error) {
       // Directory might already exist, ignore
     }
@@ -52,15 +52,15 @@ export async function POST(request: NextRequest) {
     // Generate unique filename
     const timestamp = Date.now()
     const randomStr = Math.random().toString(36).substring(2, 15)
-    const extension = file.name.split('.').pop()
+    const extension = file.name.split('.').pop()?.toLowerCase() || 'jpg'
     const filename = `${timestamp}-${randomStr}.${extension}`
-    const filepath = join(uploadsDir, filename)
+    const filepath = join(uploadDir, filename)
 
     // Write file
     await writeFile(filepath, buffer)
 
-    // Return public URL
-    const publicUrl = `/uploads/${filename}`
+    // Return public URL (relative to public folder)
+    const publicUrl = `/upload/${filename}`
 
     return NextResponse.json({ url: publicUrl, filename })
   } catch (error) {

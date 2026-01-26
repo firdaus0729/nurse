@@ -47,6 +47,12 @@ export function ImageUpload({ value, onChange, disabled }: ImageUploadProps) {
     }
   }
 
+  const handleButtonClick = () => {
+    if (!disabled && !uploading) {
+      document.getElementById(inputId)?.click()
+    }
+  }
+
   return (
     <div className="space-y-2">
       <div className="flex items-center gap-2">
@@ -58,23 +64,17 @@ export function ImageUpload({ value, onChange, disabled }: ImageUploadProps) {
           className="hidden"
           id={inputId}
         />
-        <label
-          htmlFor={inputId}
-          className={disabled || uploading ? 'pointer-events-none opacity-50' : 'cursor-pointer'}
+        <Button
+          type="button"
+          variant="outline"
+          size="sm"
+          onClick={handleButtonClick}
+          disabled={disabled || uploading}
+          className="flex items-center gap-2"
         >
-          <span className="inline-block">
-            <Button
-              type="button"
-              variant="outline"
-              size="sm"
-              disabled={disabled || uploading}
-              className="flex items-center gap-2"
-            >
-              <Upload className="h-4 w-4" />
-              {uploading ? 'Subiendo...' : 'Subir imagen'}
-            </Button>
-          </span>
-        </label>
+          <Upload className="h-4 w-4" />
+          {uploading ? 'Subiendo...' : 'Subir imagen'}
+        </Button>
         {value && (
           <Button
             type="button"

@@ -14,11 +14,11 @@ const nextConfig = {
     // Allow local images from public folder
     unoptimized: false,
   },
-  // Allow serving uploaded files from public/uploads
+  // Allow serving uploaded files from public/upload
   async headers() {
     return [
       {
-        source: '/uploads/:path*',
+        source: '/upload/:path*',
         headers: [
           {
             key: 'Cache-Control',
