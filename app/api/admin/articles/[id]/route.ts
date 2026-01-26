@@ -39,6 +39,12 @@ export async function PATCH(
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
+    // Only ADMIN can update articles
+    const userRole = (session.user as any)?.role
+    if (userRole !== 'ADMIN') {
+      return NextResponse.json({ error: 'Forbidden: Only admins can update articles' }, { status: 403 })
+    }
+
     const body = await request.json()
     const {
       title,
@@ -88,6 +94,12 @@ export async function DELETE(
     const session = await getServerSession(authOptions)
     if (!session) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+    }
+
+    // Only ADMIN can delete articles
+    const userRole = (session.user as any)?.role
+    if (userRole !== 'ADMIN') {
+      return NextResponse.json({ error: 'Forbidden: Only admins can delete articles' }, { status: 403 })
     }
 
     await prisma.article.delete({ where: { id: params.id } })

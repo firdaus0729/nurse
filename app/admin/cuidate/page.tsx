@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import Link from 'next/link'
+import { useSession } from 'next-auth/react'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import {
@@ -11,6 +12,7 @@ import {
   DialogTitle,
   DialogDescription,
 } from '@/components/ui/dialog'
+import { ImageUpload } from '@/components/ImageUpload'
 import { Edit, Heart } from 'lucide-react'
 
 const inputClass =
@@ -25,6 +27,10 @@ type CuidateCard = {
 }
 
 export default function AdminCuidatePage() {
+  const { data: session } = useSession()
+  const userRole = (session?.user as any)?.role
+  const isAdmin = userRole === 'ADMIN'
+  
   const [cards, setCards] = useState<CuidateCard[]>([])
   const [loading, setLoading] = useState(true)
   const [modalOpen, setModalOpen] = useState(false)
@@ -177,12 +183,14 @@ export default function AdminCuidatePage() {
                   Ver en web
                 </Link>
               </div>
-              <div className="flex gap-2">
-                <Button variant="outline" size="sm" onClick={() => openEdit(index)}>
-                  <Edit className="h-4 w-4 mr-1" />
-                  Editar
-                </Button>
-              </div>
+              {isAdmin && (
+                <div className="flex gap-2">
+                  <Button variant="outline" size="sm" onClick={() => openEdit(index)}>
+                    <Edit className="h-4 w-4 mr-1" />
+                    Editar
+                  </Button>
+                </div>
+              )}
             </CardContent>
           </Card>
         ))}
@@ -213,6 +221,7 @@ export default function AdminCuidatePage() {
                 onChange={(e) => setForm({ ...form, title: e.target.value })}
                 className={inputClass}
                 required
+                disabled={!isAdmin}
               />
             </div>
             <div>
@@ -223,23 +232,19 @@ export default function AdminCuidatePage() {
                 rows={3}
                 className={inputClass}
                 required
+                disabled={!isAdmin}
               />
               <p className="text-xs text-muted-foreground mt-1">
                 Texto corto que aparece en la vista colapsada de la tarjeta.
               </p>
             </div>
             <div>
-              <label className="block text-sm font-medium mb-1">Imagen (URL)</label>
-              <input
-                type="url"
+              <label className="block text-sm font-medium mb-1">Imagen</label>
+              <ImageUpload
                 value={form.imageUrl || ''}
-                onChange={(e) => setForm({ ...form, imageUrl: e.target.value })}
-                className={inputClass}
-                placeholder="https://... o /cuídate/imagen.jpg"
+                onChange={(url) => setForm({ ...form, imageUrl: url })}
+                disabled={!isAdmin}
               />
-              <p className="text-xs text-muted-foreground mt-1">
-                Enlaza una foto subida a Imgur, Google Drive (enlace público), etc.
-              </p>
             </div>
             <div>
               <label className="block text-sm font-medium mb-1">Contenido completo *</label>
@@ -249,20 +254,33 @@ export default function AdminCuidatePage() {
                 rows={15}
                 className={inputClass}
                 required
+                disabled={!isAdmin}
               />
               <p className="text-xs text-muted-foreground mt-1">
                 Contenido HTML que aparece al expandir la tarjeta. Puedes usar HTML:
                 &lt;p&gt;, &lt;strong&gt;, &lt;ul&gt;&lt;li&gt;, &lt;h4&gt;, &lt;h5&gt;, etc.
               </p>
             </div>
-            <div className="flex gap-2 pt-4">
-              <Button type="submit" disabled={saving}>
-                {saving ? 'Guardando…' : 'Guardar'}
-              </Button>
-              <Button type="button" variant="outline" onClick={() => setModalOpen(false)}>
-                Cancelar
-              </Button>
-            </div>
+            {isAdmin && (
+              <div className="flex gap-2 pt-4">
+                <Button type="submit" disabled={saving}>
+                  {saving ? 'Guardando…' : 'Guardar'}
+                </Button>
+                <Button type="button" variant="outline" onClick={() => setModalOpen(false)}>
+                  Cancelar
+                </Button>
+              </div>
+            )}
+            {!isAdmin && (
+              <div className="pt-4">
+                <p className="text-sm text-muted-foreground">
+                  Solo los administradores pueden editar tarjetas.
+                </p>
+                <Button type="button" variant="outline" onClick={() => setModalOpen(false)} className="mt-4">
+                  Cerrar
+                </Button>
+              </div>
+            )}
           </form>
         </DialogContent>
       </Dialog>

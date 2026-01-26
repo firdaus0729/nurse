@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
+import { useSession } from 'next-auth/react'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import {
@@ -10,12 +11,17 @@ import {
   DialogTitle,
   DialogDescription,
 } from '@/components/ui/dialog'
+import { ImageUpload } from '@/components/ImageUpload'
 import { Plus, Edit, Trash2 } from 'lucide-react'
 
 const inputClass =
   'w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-primary'
 
 export default function AdminCarouselPage() {
+  const { data: session } = useSession()
+  const userRole = (session?.user as any)?.role
+  const isAdmin = userRole === 'ADMIN'
+  
   const [slides, setSlides] = useState<any[]>([])
   const [loading, setLoading] = useState(true)
   const [modalOpen, setModalOpen] = useState(false)
@@ -118,14 +124,18 @@ export default function AdminCarouselPage() {
     <div>
       <div className="flex items-center justify-between mb-8">
         <h1 className="text-3xl font-bold">Carrusel (inicio)</h1>
-        <Button onClick={openCreate}>
-          <Plus className="h-4 w-4 mr-2" />
-          Nuevo slide
-        </Button>
+        {isAdmin && (
+          <Button onClick={openCreate}>
+            <Plus className="h-4 w-4 mr-2" />
+            Nuevo slide
+          </Button>
+        )}
       </div>
 
       <p className="text-muted-foreground mb-6">
-        Edita textos e imagen (URL) de los slides del inicio. Máx. 3 activos.
+        {isAdmin
+          ? 'Edita textos e imagen de los slides del inicio. Máx. 3 activos.'
+          : 'Vista de slides. Solo los administradores pueden editar.'}
       </p>
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -195,6 +205,7 @@ export default function AdminCarouselPage() {
                 onChange={(e) => setForm({ ...form, title: e.target.value })}
                 className={inputClass}
                 required
+                disabled={!isAdmin}
               />
             </div>
             <div>
@@ -204,16 +215,15 @@ export default function AdminCarouselPage() {
                 value={form.subtitle}
                 onChange={(e) => setForm({ ...form, subtitle: e.target.value })}
                 className={inputClass}
+                disabled={!isAdmin}
               />
             </div>
             <div>
-              <label className="block text-sm font-medium mb-1">Imagen (URL) *</label>
-              <input
-                type="url"
+              <label className="block text-sm font-medium mb-1">Imagen *</label>
+              <ImageUpload
                 value={form.imageUrl}
-                onChange={(e) => setForm({ ...form, imageUrl: e.target.value })}
-                className={inputClass}
-                placeholder="https://... o /slide1.jpg"
+                onChange={(url) => setForm({ ...form, imageUrl: url })}
+                disabled={!isAdmin}
               />
             </div>
             <div>
@@ -224,6 +234,7 @@ export default function AdminCarouselPage() {
                 onChange={(e) => setForm({ ...form, ctaText: e.target.value })}
                 className={inputClass}
                 placeholder="ej. Habla ahora"
+                disabled={!isAdmin}
               />
             </div>
             <div>
@@ -234,6 +245,7 @@ export default function AdminCarouselPage() {
                 onChange={(e) => setForm({ ...form, ctaLink: e.target.value })}
                 className={inputClass}
                 placeholder="/chat, /realities, /take-care"
+                disabled={!isAdmin}
               />
             </div>
             <div>
@@ -243,6 +255,7 @@ export default function AdminCarouselPage() {
                 value={form.order}
                 onChange={(e) => setForm({ ...form, order: parseInt(e.target.value, 10) || 0 })}
                 className={inputClass}
+                disabled={!isAdmin}
               />
             </div>
             <div className="flex items-center gap-2">
@@ -252,19 +265,32 @@ export default function AdminCarouselPage() {
                 checked={form.isActive}
                 onChange={(e) => setForm({ ...form, isActive: e.target.checked })}
                 className="rounded border"
+                disabled={!isAdmin}
               />
               <label htmlFor="active" className="text-sm">
                 Activo
               </label>
             </div>
-            <div className="flex gap-2 pt-4">
-              <Button type="submit" disabled={saving}>
-                {saving ? 'Guardando…' : 'Guardar'}
-              </Button>
-              <Button type="button" variant="outline" onClick={() => setModalOpen(false)}>
-                Cancelar
-              </Button>
-            </div>
+            {isAdmin && (
+              <div className="flex gap-2 pt-4">
+                <Button type="submit" disabled={saving}>
+                  {saving ? 'Guardando…' : 'Guardar'}
+                </Button>
+                <Button type="button" variant="outline" onClick={() => setModalOpen(false)}>
+                  Cancelar
+                </Button>
+              </div>
+            )}
+            {!isAdmin && (
+              <div className="pt-4">
+                <p className="text-sm text-muted-foreground">
+                  Solo los administradores pueden editar slides.
+                </p>
+                <Button type="button" variant="outline" onClick={() => setModalOpen(false)} className="mt-4">
+                  Cerrar
+                </Button>
+              </div>
+            )}
           </form>
         </DialogContent>
       </Dialog>

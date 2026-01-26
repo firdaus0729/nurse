@@ -14,6 +14,20 @@ const nextConfig = {
     // Allow local images from public folder
     unoptimized: false,
   },
+  // Allow serving uploaded files from public/uploads
+  async headers() {
+    return [
+      {
+        source: '/uploads/:path*',
+        headers: [
+          {
+            key: 'Cache-Control',
+            value: 'public, max-age=31536000, immutable',
+          },
+        ],
+      },
+    ]
+  },
 }
 
 module.exports = nextConfig

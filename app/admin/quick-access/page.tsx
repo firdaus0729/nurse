@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
+import { useSession } from 'next-auth/react'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import {
@@ -16,6 +17,10 @@ const inputClass =
   'w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-primary'
 
 export default function AdminQuickAccessPage() {
+  const { data: session } = useSession()
+  const userRole = (session?.user as any)?.role
+  const isAdmin = userRole === 'ADMIN'
+  
   const [cards, setCards] = useState<any[]>([])
   const [loading, setLoading] = useState(true)
   const [modalOpen, setModalOpen] = useState(false)
@@ -158,19 +163,21 @@ export default function AdminQuickAccessPage() {
                     Campaña
                   </span>
                 )}
-                <div className="flex gap-2">
-                  <Button variant="outline" size="sm" onClick={() => openEdit(c)}>
-                    <Edit className="h-4 w-4" />
-                  </Button>
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => handleDelete(c.id)}
-                    className="text-destructive hover:text-destructive"
-                  >
-                    <Trash2 className="h-4 w-4" />
-                  </Button>
-                </div>
+                {isAdmin && (
+                  <div className="flex gap-2">
+                    <Button variant="outline" size="sm" onClick={() => openEdit(c)}>
+                      <Edit className="h-4 w-4" />
+                    </Button>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => handleDelete(c.id)}
+                      className="text-destructive hover:text-destructive"
+                    >
+                      <Trash2 className="h-4 w-4" />
+                    </Button>
+                  </div>
+                )}
               </div>
             </CardContent>
           </Card>
@@ -202,6 +209,7 @@ export default function AdminQuickAccessPage() {
                 onChange={(e) => setForm({ ...form, title: e.target.value })}
                 className={inputClass}
                 required
+                disabled={!isAdmin}
               />
             </div>
             <div>
@@ -211,6 +219,7 @@ export default function AdminQuickAccessPage() {
                 onChange={(e) => setForm({ ...form, description: e.target.value })}
                 rows={2}
                 className={inputClass}
+                disabled={!isAdmin}
               />
             </div>
             <div>
@@ -222,6 +231,7 @@ export default function AdminQuickAccessPage() {
                 className={inputClass}
                 placeholder="/learn, /take-care, /realities, /chat..."
                 required
+                disabled={!isAdmin}
               />
             </div>
             <div>
@@ -232,6 +242,7 @@ export default function AdminQuickAccessPage() {
                 onChange={(e) => setForm({ ...form, icon: e.target.value })}
                 className={inputClass}
                 placeholder="BookOpen, Heart, MessageCircle..."
+                disabled={!isAdmin}
               />
             </div>
             <div>
@@ -241,6 +252,7 @@ export default function AdminQuickAccessPage() {
                 value={form.order}
                 onChange={(e) => setForm({ ...form, order: parseInt(e.target.value, 10) || 0 })}
                 className={inputClass}
+                disabled={!isAdmin}
               />
             </div>
             <div className="flex items-center gap-2">
@@ -250,6 +262,7 @@ export default function AdminQuickAccessPage() {
                 checked={form.isActive}
                 onChange={(e) => setForm({ ...form, isActive: e.target.checked })}
                 className="rounded border"
+                disabled={!isAdmin}
               />
               <label htmlFor="active" className="text-sm">
                 Activo
@@ -262,6 +275,7 @@ export default function AdminQuickAccessPage() {
                 checked={form.isCampaign}
                 onChange={(e) => setForm({ ...form, isCampaign: e.target.checked })}
                 className="rounded border"
+                disabled={!isAdmin}
               />
               <label htmlFor="campaign" className="text-sm">
                 Campaña
@@ -275,17 +289,30 @@ export default function AdminQuickAccessPage() {
                   value={form.campaignEnd}
                   onChange={(e) => setForm({ ...form, campaignEnd: e.target.value })}
                   className={inputClass}
+                  disabled={!isAdmin}
                 />
               </div>
             )}
-            <div className="flex gap-2 pt-4">
-              <Button type="submit" disabled={saving}>
-                {saving ? 'Guardando…' : 'Guardar'}
-              </Button>
-              <Button type="button" variant="outline" onClick={() => setModalOpen(false)}>
-                Cancelar
-              </Button>
-            </div>
+            {isAdmin && (
+              <div className="flex gap-2 pt-4">
+                <Button type="submit" disabled={saving}>
+                  {saving ? 'Guardando…' : 'Guardar'}
+                </Button>
+                <Button type="button" variant="outline" onClick={() => setModalOpen(false)}>
+                  Cancelar
+                </Button>
+              </div>
+            )}
+            {!isAdmin && (
+              <div className="pt-4">
+                <p className="text-sm text-muted-foreground">
+                  Solo los administradores pueden editar tarjetas.
+                </p>
+                <Button type="button" variant="outline" onClick={() => setModalOpen(false)} className="mt-4">
+                  Cerrar
+                </Button>
+              </div>
+            )}
           </form>
         </DialogContent>
       </Dialog>

@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import Link from 'next/link'
+import { useSession } from 'next-auth/react'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import {
@@ -11,6 +12,7 @@ import {
   DialogTitle,
   DialogDescription,
 } from '@/components/ui/dialog'
+import { ImageUpload } from '@/components/ImageUpload'
 import { ARTICLE_TYPE_LABELS } from '@/lib/utils'
 import { FileText, Plus, Edit, Trash2 } from 'lucide-react'
 
@@ -25,6 +27,11 @@ const inputClass =
   'w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-primary'
 
 export default function AdminContentPage() {
+  const { data: session } = useSession()
+  const userRole = (session?.user as any)?.role
+  const isAdmin = userRole === 'ADMIN'
+  const isNurse = userRole === 'NURSE'
+  
   const [articles, setArticles] = useState<any[]>([])
   const [categories, setCategories] = useState<any[]>([])
   const [loading, setLoading] = useState(true)
@@ -188,21 +195,23 @@ export default function AdminContentPage() {
                   Ver en web
                 </Link>
               </div>
-              <div className="flex gap-2 mt-4">
-                <Button variant="outline" size="sm" onClick={() => openEdit(a)}>
-                  <Edit className="h-4 w-4 mr-1" />
-                  Editar
-                </Button>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => handleDelete(a.id)}
-                  className="text-destructive hover:text-destructive"
-                >
-                  <Trash2 className="h-4 w-4 mr-1" />
-                  Eliminar
-                </Button>
-              </div>
+              {isAdmin && (
+                <div className="flex gap-2 mt-4">
+                  <Button variant="outline" size="sm" onClick={() => openEdit(a)}>
+                    <Edit className="h-4 w-4 mr-1" />
+                    Editar
+                  </Button>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => handleDelete(a.id)}
+                    className="text-destructive hover:text-destructive"
+                  >
+                    <Trash2 className="h-4 w-4 mr-1" />
+                    Eliminar
+                  </Button>
+                </div>
+              )}
             </CardContent>
           </Card>
         ))}
@@ -233,6 +242,7 @@ export default function AdminContentPage() {
                 onChange={(e) => setForm({ ...form, title: e.target.value })}
                 className={inputClass}
                 required
+                disabled={!isAdmin}
               />
             </div>
             <div>
@@ -243,6 +253,7 @@ export default function AdminContentPage() {
                 onChange={(e) => setForm({ ...form, slug: e.target.value })}
                 className={inputClass}
                 placeholder="ej. mi-historia-real"
+                disabled={!isAdmin}
               />
               <p className="text-xs text-muted-foreground mt-1">
                 Opcional. Si está vacío se genera del título.
@@ -254,6 +265,7 @@ export default function AdminContentPage() {
                 value={form.articleType}
                 onChange={(e) => setForm({ ...form, articleType: e.target.value })}
                 className={inputClass}
+                disabled={!isAdmin}
               >
                 {articleTypes.map((t) => (
                   <option key={t.value} value={t.value}>
@@ -268,6 +280,7 @@ export default function AdminContentPage() {
                 value={form.categoryId}
                 onChange={(e) => setForm({ ...form, categoryId: e.target.value })}
                 className={inputClass}
+                disabled={!isAdmin}
               >
                 <option value="">— Sin categoría —</option>
                 {categories.map((c) => (
@@ -297,6 +310,7 @@ export default function AdminContentPage() {
                 onChange={(e) => setForm({ ...form, excerpt: e.target.value })}
                 rows={2}
                 className={inputClass}
+                disabled={!isAdmin}
               />
             </div>
             <div>
@@ -307,6 +321,7 @@ export default function AdminContentPage() {
                 rows={12}
                 className={inputClass}
                 required
+                disabled={!isAdmin}
               />
               <p className="text-xs text-muted-foreground mt-1">
                 Puedes usar HTML: &lt;p&gt;, &lt;strong&gt;, &lt;ul&gt;&lt;li&gt;, &lt;h4&gt;, etc.
@@ -319,19 +334,32 @@ export default function AdminContentPage() {
                 checked={form.isPublished}
                 onChange={(e) => setForm({ ...form, isPublished: e.target.checked })}
                 className="rounded border"
+                disabled={!isAdmin}
               />
               <label htmlFor="pub" className="text-sm">
                 Publicado (visible en Realidades)
               </label>
             </div>
-            <div className="flex gap-2 pt-4">
-              <Button type="submit" disabled={saving}>
-                {saving ? 'Guardando…' : 'Guardar'}
-              </Button>
-              <Button type="button" variant="outline" onClick={() => setModalOpen(false)}>
-                Cancelar
-              </Button>
-            </div>
+            {isAdmin && (
+              <div className="flex gap-2 pt-4">
+                <Button type="submit" disabled={saving}>
+                  {saving ? 'Guardando…' : 'Guardar'}
+                </Button>
+                <Button type="button" variant="outline" onClick={() => setModalOpen(false)}>
+                  Cancelar
+                </Button>
+              </div>
+            )}
+            {!isAdmin && (
+              <div className="pt-4">
+                <p className="text-sm text-muted-foreground">
+                  Solo los administradores pueden editar contenido.
+                </p>
+                <Button type="button" variant="outline" onClick={() => setModalOpen(false)} className="mt-4">
+                  Cerrar
+                </Button>
+              </div>
+            )}
           </form>
         </DialogContent>
       </Dialog>

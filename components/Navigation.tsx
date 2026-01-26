@@ -3,9 +3,11 @@
 import { useState } from 'react'
 import Link from 'next/link'
 import Image from 'next/image'
-import { usePathname } from 'next/navigation'
+import { usePathname, useRouter } from 'next/navigation'
+import { signOut, useSession } from 'next-auth/react'
 import { cn } from '@/lib/utils'
-import { Menu, X } from 'lucide-react'
+import { Menu, X, LogOut } from 'lucide-react'
+import { Button } from '@/components/ui/button'
 
 const navItems = [
   { href: '/', label: 'Inicio' },
@@ -17,6 +19,8 @@ const navItems = [
 
 export function Navigation() {
   const pathname = usePathname()
+  const router = useRouter()
+  const { data: session } = useSession()
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
 
   const toggleMobileMenu = () => {
@@ -25,6 +29,12 @@ export function Navigation() {
 
   const closeMobileMenu = () => {
     setIsMobileMenuOpen(false)
+  }
+
+  const handleLogout = async () => {
+    await signOut({ redirect: false })
+    router.push('/')
+    router.refresh()
   }
 
   return (
@@ -58,6 +68,17 @@ export function Navigation() {
               {item.label}
             </Link>
           ))}
+          {session && (
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={handleLogout}
+              className="flex items-center gap-2"
+            >
+              <LogOut className="h-4 w-4" />
+              Salir
+            </Button>
+          )}
         </div>
 
         {/* Mobile menu button */}
@@ -96,6 +117,18 @@ export function Navigation() {
                 {item.label}
               </Link>
             ))}
+            {session && (
+              <button
+                onClick={() => {
+                  closeMobileMenu()
+                  handleLogout()
+                }}
+                className="w-full flex items-center gap-2 px-4 py-3 text-sm font-medium rounded-md text-muted-foreground hover:bg-accent hover:text-accent-foreground"
+              >
+                <LogOut className="h-4 w-4" />
+                Salir
+              </button>
+            )}
           </div>
         </div>
       )}

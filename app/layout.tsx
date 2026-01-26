@@ -1,9 +1,8 @@
 import type { Metadata } from "next"
 import { Inter } from "next/font/google"
 import "./globals.css"
-import { FloatingChatButton } from "@/components/FloatingChatButton"
-import { Navigation } from "@/components/Navigation"
-import { Footer } from "@/components/Footer"
+import { SessionProvider } from "@/components/SessionProvider"
+import { RootLayoutContent } from "@/components/RootLayoutContent"
 
 const inter = Inter({ subsets: ["latin"] })
 
@@ -24,12 +23,9 @@ export default function RootLayout({
   return (
     <html lang="es">
       <body className={inter.className}>
-        <Navigation />
-        <main className="min-h-screen">
-          {children}
-        </main>
-        <Footer />
-        <FloatingChatButton />
+        <SessionProvider>
+          <RootLayoutContent>{children}</RootLayoutContent>
+        </SessionProvider>
       </body>
     </html>
   )
