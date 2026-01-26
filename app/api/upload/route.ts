@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { writeFile, mkdir } from 'fs/promises'
+import { existsSync } from 'fs'
 import { join } from 'path'
 import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth'
@@ -10,9 +11,11 @@ export async function POST(request: NextRequest) {
   try {
     const session = await getServerSession(authOptions)
     if (!session) {
+      console.error('Upload: No session found')
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
+    console.log('Upload: Session found, processing file...')
     const formData = await request.formData()
     const file = formData.get('file') as File | null
 
@@ -42,13 +45,33 @@ export async function POST(request: NextRequest) {
     const buffer = Buffer.from(bytes)
 
     // Create upload directory if it doesn't exist
-    const uploadDir = join(process.cwd(), 'public', 'upload')
+    // Use a more reliable path resolution
+    const cwd = process.cwd()
+    console.log('Current working directory:', cwd)
+    
+    // Build the upload directory path
+    const publicDir = join(cwd, 'public')
+    const uploadDir = join(publicDir, 'upload')
+    
+    console.log('Public directory:', publicDir)
+    console.log('Upload directory:', uploadDir)
+    
     try {
-      await mkdir(uploadDir, { recursive: true })
+      // Ensure both public and upload directories exist
+      if (!existsSync(publicDir)) {
+        console.log('Creating public directory...')
+        await mkdir(publicDir, { recursive: true })
+      }
+      if (!existsSync(uploadDir)) {
+        console.log('Creating upload directory...')
+        await mkdir(uploadDir, { recursive: true })
+      }
+      console.log('Upload directory verified:', uploadDir)
     } catch (mkdirError: any) {
       console.error('Error creating upload directory:', mkdirError)
+      console.error('Attempted paths - Public:', publicDir, 'Upload:', uploadDir)
       return NextResponse.json(
-        { error: `Failed to create upload directory: ${mkdirError.message}` },
+        { error: `Failed to create upload directory: ${mkdirError.message}. Tried: ${uploadDir}` },
         { status: 500 }
       )
     }
@@ -66,6 +89,7 @@ export async function POST(request: NextRequest) {
       console.log(`Upload: File written successfully to ${filepath}`)
     } catch (writeError: any) {
       console.error('Error writing file:', writeError)
+      console.error('File path:', filepath)
       return NextResponse.json(
         { error: `Failed to write file: ${writeError.message}` },
         { status: 500 }

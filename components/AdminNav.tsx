@@ -11,20 +11,20 @@ import {
   MessageCircle,
   Home,
   Upload as UploadIcon,
-  Grid3x3,
   FileText,
   Heart,
+  Info,
   LogOut,
 } from 'lucide-react'
 
 const adminNavItems = [
   { href: '/admin', label: 'Dashboard', icon: LayoutDashboard },
-  { href: '/', label: 'Inicio', icon: Home },
+  { href: '/admin/inicio', label: 'Inicio', icon: Home },
   { href: '/admin/upload', label: 'Upload', icon: UploadIcon },
   { href: '/admin/chat', label: 'Chat', icon: MessageCircle },
-  { href: '/admin/quick-access', label: 'Accesos rápidos', icon: Grid3x3 },
   { href: '/admin/content', label: 'Contenido', icon: FileText },
   { href: '/admin/cuidate', label: 'Cuídate', icon: Heart },
+  { href: '/admin/about', label: 'Sobre nosotros', icon: Info },
 ]
 
 export function AdminNav() {
