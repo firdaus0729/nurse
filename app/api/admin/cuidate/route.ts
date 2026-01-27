@@ -5,14 +5,9 @@ import { prisma } from '@/lib/prisma'
 
 export const dynamic = 'force-dynamic'
 
-// Get Cuídate section with cards
+// Get Cuídate section with cards (public for reading)
 export async function GET() {
   try {
-    const session = await getServerSession(authOptions)
-    if (!session) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
-    }
-
     const page = await prisma.page.findUnique({
       where: { slug: 'take-care' },
       include: {

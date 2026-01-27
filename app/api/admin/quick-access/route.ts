@@ -3,14 +3,9 @@ import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth'
 import { prisma } from '@/lib/prisma'
 
-// Get all quick access cards (staff only)
+// Get all quick access cards (public for reading)
 export async function GET() {
   try {
-    const session = await getServerSession(authOptions)
-    if (!session) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
-    }
-
     const cards = await prisma.quickAccessCard.findMany({
       orderBy: { order: 'asc' },
     })
