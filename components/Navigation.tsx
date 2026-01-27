@@ -14,7 +14,7 @@ const navItems = [
   { href: '/learn', label: 'Infórmate' },
   { href: '/take-care', label: 'Cuídate' },
   { href: '/realities', label: 'Realidades' },
-  { href: '/about', label: 'Sobre nosotros' },
+  { href: '/about', label: 'Contacto' },
 ]
 
 export function Navigation() {

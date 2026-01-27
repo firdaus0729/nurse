@@ -14,6 +14,7 @@ import {
   FileText,
   Heart,
   Info,
+  BookOpen,
   LogOut,
 } from 'lucide-react'
 
@@ -24,6 +25,7 @@ const adminNavItems = [
   { href: '/admin/chat', label: 'Chat', icon: MessageCircle },
   { href: '/admin/content', label: 'Contenido', icon: FileText },
   { href: '/admin/cuidate', label: 'Cuídate', icon: Heart },
+  { href: '/admin/learn', label: 'Infórmate', icon: BookOpen },
   { href: '/admin/about', label: 'Sobre nosotros', icon: Info },
 ]
 

@@ -14,7 +14,7 @@ export default async function AboutPage() {
 
   return (
     <div className="container py-8 max-w-4xl">
-      <h1 className="text-4xl font-bold mb-8">Sobre nosotros</h1>
+      <h1 className="text-4xl font-bold mb-8">Contacto</h1>
       
       {page ? (
         <div className="prose max-w-none">

@@ -8,9 +8,40 @@ export async function POST(request: NextRequest) {
   try {
     const { name, email, subject, message } = await request.json()
 
-    if (!subject || !message) {
+    // Validate all fields are present and non-empty
+    if (!name || typeof name !== 'string' || name.trim().length === 0) {
       return NextResponse.json(
-        { error: 'Subject and message are required' },
+        { error: 'El nombre es obligatorio' },
+        { status: 400 }
+      )
+    }
+
+    if (!email || typeof email !== 'string' || email.trim().length === 0) {
+      return NextResponse.json(
+        { error: 'El email es obligatorio' },
+        { status: 400 }
+      )
+    }
+
+    // Validate email format
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
+    if (!emailRegex.test(email.trim())) {
+      return NextResponse.json(
+        { error: 'El formato del email no es válido' },
+        { status: 400 }
+      )
+    }
+
+    if (!subject || typeof subject !== 'string' || subject.trim().length === 0) {
+      return NextResponse.json(
+        { error: 'El asunto es obligatorio' },
+        { status: 400 }
+      )
+    }
+
+    if (!message || typeof message !== 'string' || message.trim().length === 0) {
+      return NextResponse.json(
+        { error: 'El mensaje es obligatorio' },
         { status: 400 }
       )
     }

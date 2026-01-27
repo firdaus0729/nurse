@@ -18,7 +18,7 @@ export function Footer() {
               <h3 className="font-bold text-lg">BE NURSE</h3>
             </Link>
             <p className="text-sm text-muted-foreground">
-              Plataforma educativa y de apoyo comunitario sobre salud sexual.
+              Plataforma educativa y de apoyo en salud sexual.
             </p>
           </div>
           
@@ -42,7 +42,7 @@ export function Footer() {
               </li>
               <li>
                 <Link href="/about" className="text-muted-foreground hover:text-primary">
-                  Sobre nosotros
+                  Contacto
                 </Link>
               </li>
             </ul>

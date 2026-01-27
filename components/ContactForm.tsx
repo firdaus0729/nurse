@@ -13,11 +13,13 @@ export function ContactForm() {
   })
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [submitStatus, setSubmitStatus] = useState<'idle' | 'success' | 'error'>('idle')
+  const [errorMessage, setErrorMessage] = useState<string>('')
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     setIsSubmitting(true)
     setSubmitStatus('idle')
+    setErrorMessage('')
 
     try {
       const response = await fetch('/api/contact', {
@@ -33,11 +35,21 @@ export function ContactForm() {
         // Reset success message after 5 seconds
         setTimeout(() => setSubmitStatus('idle'), 5000)
       } else {
-        throw new Error('Failed to submit')
+        const data = await response.json().catch(() => ({}))
+        setErrorMessage(data.error || 'Error al enviar el mensaje. Por favor, intenta de nuevo.')
+        setSubmitStatus('error')
+        setTimeout(() => {
+          setSubmitStatus('idle')
+          setErrorMessage('')
+        }, 5000)
       }
     } catch (error) {
+      setErrorMessage('Error al enviar el mensaje. Por favor, intenta de nuevo o usa el chat.')
       setSubmitStatus('error')
-      setTimeout(() => setSubmitStatus('idle'), 5000)
+      setTimeout(() => {
+        setSubmitStatus('idle')
+        setErrorMessage('')
+      }, 5000)
     } finally {
       setIsSubmitting(false)
     }
@@ -52,30 +64,32 @@ export function ContactForm() {
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
             <label htmlFor="name" className="block text-sm font-medium mb-1">
-              Nombre (opcional)
+              Nombre
             </label>
             <input
               id="name"
               type="text"
               value={formData.name}
               onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+              required
               className="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-primary"
             />
           </div>
 
           <div>
             <label htmlFor="email" className="block text-sm font-medium mb-1">
-              Email (opcional)
+              Email
             </label>
             <input
               id="email"
               type="email"
               value={formData.email}
               onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+              required
               className="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-primary"
             />
             <p className="text-xs text-muted-foreground mt-1">
-              Si no proporcionas email, te responderemos a través del chat si es necesario.
+              Necesitamos un email para poder responderte.
             </p>
           </div>
 
@@ -115,7 +129,7 @@ export function ContactForm() {
 
           {submitStatus === 'error' && (
             <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded">
-              Error al enviar el mensaje. Por favor, intenta de nuevo o usa el chat.
+              {errorMessage || 'Error al enviar el mensaje. Por favor, intenta de nuevo o usa el chat.'}
             </div>
           )}
 

@@ -23,6 +23,17 @@ export default function ChatPage() {
   }, [])
 
   useEffect(() => {
+    // Poll for new messages when a conversation exists
+    if (!conversationId) return
+
+    const interval = setInterval(() => {
+      loadMessages(conversationId)
+    }, 5000)
+
+    return () => clearInterval(interval)
+  }, [conversationId])
+
+  useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' })
   }, [messages])
 
@@ -103,7 +114,11 @@ export default function ChatPage() {
               <h3 className="font-semibold">Antes de comenzar:</h3>
               <ul className="list-disc list-inside space-y-1 text-sm text-muted-foreground">
                 <li>Este servicio es completamente anónimo. No guardamos información personal.</li>
-                <li>Las conversaciones son asíncronas. Un profesional de enfermería responderá cuando esté disponible.</li>
+                <li>
+                  Las conversaciones son asíncronas. Un profesional de enfermería responderá cuando esté disponible.
+                  <br />
+                  Si no recibes respuesta, puedes dejarnos tu mensaje en el formulario de Contacto.
+                </li>
                 <li>Este NO es un servicio de emergencia. Para emergencias, contacta con el 112.</li>
                 <li>Respetamos tu privacidad y confidencialidad en todo momento.</li>
                 <li>Las respuestas son de carácter educativo y no sustituyen una consulta médica presencial.</li>
@@ -157,8 +172,11 @@ export default function ChatPage() {
             <div>
               <p className="font-semibold text-foreground mb-1">Este NO es un servicio de emergencia.</p>
               <p>
-                Un profesional de enfermería responderá cuando esté disponible. Para emergencias médicas, 
-                contacta inmediatamente con el <strong>112</strong>. Todas las conversaciones son anónimas y asíncronas.
+                Un profesional de enfermería responderá cuando esté disponible.
+                <br />
+                Si no recibes respuesta, puedes dejarnos tu mensaje en el formulario de Contacto.
+                <br />
+                Para emergencias médicas, contacta inmediatamente con el <strong>112</strong>. Todas las conversaciones son anónimas y asíncronas.
               </p>
             </div>
           </div>
@@ -173,7 +191,11 @@ export default function ChatPage() {
           {messages.length === 0 ? (
             <div className="text-center text-muted-foreground py-8">
               <p>Envía un mensaje para comenzar la conversación.</p>
-              <p className="text-sm mt-2">Un profesional de enfermería responderá cuando esté disponible.</p>
+              <p className="text-sm mt-2">
+                Un profesional de enfermería responderá cuando esté disponible.
+                <br />
+                Si no recibes respuesta, puedes dejarnos tu mensaje en el formulario de Contacto.
+              </p>
             </div>
           ) : (
             messages.map((message) => (
@@ -202,7 +224,11 @@ export default function ChatPage() {
           {messages.length > 0 && messages[messages.length - 1]?.isFromUser && (
             <div className="flex justify-start">
               <div className="bg-secondary text-secondary-foreground rounded-lg p-3 max-w-[80%]">
-                <p className="text-sm italic">Un profesional de enfermería responderá cuando esté disponible.</p>
+                <p className="text-sm italic">
+                  Un profesional de enfermería responderá cuando esté disponible.
+                  <br />
+                  Si no recibes respuesta, puedes dejarnos tu mensaje en el formulario de Contacto.
+                </p>
               </div>
             </div>
           )}
