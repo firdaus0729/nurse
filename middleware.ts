@@ -1,10 +1,30 @@
-// Middleware removed - authentication is now handled at the root layout level
-// All routes are accessible, but login page is shown if no session exists
-export default function middleware() {
-  // No middleware needed - authentication handled in RootLayoutContent
-}
+import { withAuth } from 'next-auth/middleware'
+import { NextResponse } from 'next/server'
+
+export default withAuth(
+  function middleware(_req) {
+    return NextResponse.next()
+  },
+  {
+    callbacks: {
+      authorized: ({ token, req }) => {
+        const path = req.nextUrl.pathname
+
+        // Allow admin login page without auth
+        if (path === '/admin/login') return true
+
+        // Protect all /admin routes
+        if (path.startsWith('/admin')) {
+          return !!token
+        }
+
+        return true
+      },
+    },
+  }
+)
 
 export const config = {
-  matcher: [],
+  matcher: ['/admin/:path*'],
 }
 

@@ -2,7 +2,9 @@ import type { Metadata } from "next"
 import { Inter } from "next/font/google"
 import "./globals.css"
 import { SessionProvider } from "@/components/SessionProvider"
-import { RootLayoutContent } from "@/components/RootLayoutContent"
+import { Navigation } from "@/components/Navigation"
+import { Footer } from "@/components/Footer"
+import { FloatingChatButton } from "@/components/FloatingChatButton"
 
 const inter = Inter({ subsets: ["latin"] })
 
@@ -24,7 +26,10 @@ export default function RootLayout({
     <html lang="es">
       <body className={inter.className}>
         <SessionProvider>
-          <RootLayoutContent>{children}</RootLayoutContent>
+          <Navigation />
+          <main className="min-h-screen">{children}</main>
+          <Footer />
+          <FloatingChatButton />
         </SessionProvider>
       </body>
     </html>
