@@ -2,6 +2,8 @@ import { prisma } from '@/lib/prisma'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { ContactForm } from '@/components/ContactForm'
 
+export const dynamic = 'force-dynamic'
+
 export default async function AboutPage() {
   const page = await prisma.page.findUnique({
     where: { slug: 'about' },

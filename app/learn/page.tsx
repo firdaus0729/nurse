@@ -4,6 +4,8 @@ import { AccordionSection } from '@/components/AccordionSection'
 import { StiCardGrid, type StiItem } from '@/components/StiCardGrid'
 import Link from 'next/link'
 
+export const dynamic = 'force-dynamic'
+
 function slugify(input: string) {
   return input
     .toLowerCase()
