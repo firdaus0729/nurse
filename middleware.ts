@@ -1,6 +1,5 @@
 import { NextResponse } from 'next/server'
 import type { NextRequest } from 'next/server'
-import { getToken } from 'next-auth/jwt'
 
 export async function middleware(req: NextRequest) {
   const { pathname } = req.nextUrl
@@ -12,32 +11,24 @@ export async function middleware(req: NextRequest) {
     return NextResponse.next()
   }
 
-  const token = await getToken({ req, secret: process.env.NEXTAUTH_SECRET })
-  const isAdmin = token?.role === 'ADMIN'
+  // NextAuth uses different cookie names depending on environment
+  const sessionCookie =
+    req.cookies.get('next-auth.session-token') ??
+    req.cookies.get('__Secure-next-auth.session-token')
+  const hasSession = !!sessionCookie
 
   // API routes: return status codes (no redirects)
   if (isAdminApiPath) {
-    if (!token) {
+    if (!hasSession) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
-    }
-    if (!isAdmin) {
-      return NextResponse.json(
-        { error: 'Forbidden: Only admins can access this resource' },
-        { status: 403 }
-      )
     }
     return NextResponse.next()
   }
 
   // Admin pages: unauthenticated users must log in
-  if (!token) {
+  if (!hasSession) {
     if (isAdminLoginPath) return NextResponse.next()
     return NextResponse.redirect(new URL('/admin/login', req.url))
-  }
-
-  // Authenticated non-admins are redirected to the main page
-  if (!isAdmin) {
-    return NextResponse.redirect(new URL('/', req.url))
   }
 
   // Logged-in admins should not see the login screen again
