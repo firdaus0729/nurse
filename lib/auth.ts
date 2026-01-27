@@ -24,6 +24,11 @@ export const authOptions: NextAuthOptions = {
           return null
         }
 
+        // Only allow administrators to log in
+        if (user.role !== 'ADMIN') {
+          return null
+        }
+
         const isPasswordValid = await bcrypt.compare(
           credentials.password,
           user.password
@@ -63,7 +68,7 @@ export const authOptions: NextAuthOptions = {
     },
   },
   pages: {
-    signIn: '/',
+    signIn: '/admin/login',
   },
   secret: process.env.NEXTAUTH_SECRET,
 }
