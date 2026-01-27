@@ -1,50 +1,26 @@
-'use client'
-
-import { useEffect, useMemo, useRef, useState } from 'react'
-import Link from 'next/link'
-import { Button } from '@/components/ui/button'
+import { getServerSession } from 'next-auth'
+import { authOptions } from '@/lib/auth'
+import { prisma } from '@/lib/prisma'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { Badge } from '@/components/ui/badge'
+import Link from 'next/link'
 import { formatDate } from '@/lib/utils'
+import { Badge } from '@/components/ui/badge'
 
-type Msg = { id: string; content: string; isFromUser: boolean; createdAt: string }
-type Conv = {
-  id: string
-  uuid: string
-  status: 'OPEN' | 'IN_PROGRESS' | 'CLOSED'
-  createdAt: string
-  updatedAt: string
-  messages: Msg[]
-}
+export default async function AdminChatPage() {
+  const session = await getServerSession(authOptions)
 
-export default function AdminChatPage() {
-  const [loading, setLoading] = useState(true)
-  const [conversations, setConversations] = useState<Conv[]>([])
-  const [replyForConversationId, setReplyForConversationId] = useState<string | null>(null)
-  const [replyText, setReplyText] = useState('')
-  const [sending, setSending] = useState(false)
-  const pollRef = useRef<number | null>(null)
-
-  const load = async () => {
-    try {
-      const res = await fetch('/api/admin/chat-feed?limit=50&messagesPerConversation=50', {
-        cache: 'no-store',
-      })
-      if (!res.ok) return
-      const data = await res.json()
-      setConversations(data.conversations || [])
-    } finally {
-      setLoading(false)
-    }
-  }
-
-  useEffect(() => {
-    load()
-    pollRef.current = window.setInterval(load, 5000)
-    return () => {
-      if (pollRef.current) window.clearInterval(pollRef.current)
-    }
-  }, [])
+  const conversations = await prisma.conversation.findMany({
+    include: {
+      messages: {
+        orderBy: { createdAt: 'asc' },
+        take: 1,
+      },
+      _count: {
+        select: { messages: true },
+      },
+    },
+    orderBy: { updatedAt: 'desc' },
+  })
 
   const getStatusColor = (status: string) => {
     switch (status) {
@@ -59,138 +35,47 @@ export default function AdminChatPage() {
     }
   }
 
-  const statusLabels: Record<string, string> = useMemo(
-    () => ({
-      OPEN: 'Abierta',
-      IN_PROGRESS: 'En progreso',
-      CLOSED: 'Cerrada',
-    }),
-    []
-  )
-
-  const sendReply = async (conversationId: string) => {
-    if (!replyText.trim() || sending) return
-    setSending(true)
-    try {
-      const res = await fetch(`/api/admin/conversations/${conversationId}/messages`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ message: replyText.trim() }),
-      })
-      if (!res.ok) throw new Error('Failed to send reply')
-      setReplyText('')
-      setReplyForConversationId(null)
-      await load()
-    } catch (e) {
-      console.error(e)
-      alert('Error al enviar la respuesta.')
-    } finally {
-      setSending(false)
-    }
-  }
-
-  if (loading) return <div>Cargando...</div>
-
   return (
     <div>
-      <div className="flex items-center justify-between mb-6">
-        <h1 className="text-3xl font-bold">Chat (todas las conversaciones)</h1>
-        <Link href="/admin/chat" className="text-sm text-muted-foreground hover:underline">
-          Actualiza automáticamente cada 5s
-        </Link>
-      </div>
+      <h1 className="text-3xl font-bold mb-8">Conversaciones</h1>
 
-      <div className="space-y-6">
-        {conversations.map((c) => (
-          <Card key={c.id}>
-            <CardHeader>
-              <div className="flex items-center justify-between gap-3">
-                <div>
-                  <CardTitle className="text-lg">
-                    Conversación {c.uuid.substring(0, 8)}...
-                  </CardTitle>
-                  <div className="text-xs text-muted-foreground mt-1">
-                    Inicio: {formatDate(new Date(c.createdAt))} · Última actividad:{' '}
-                    {formatDate(new Date(c.updatedAt))}
-                  </div>
-                </div>
-                <div className="flex items-center gap-2">
-                  <Badge className={getStatusColor(c.status)}>{statusLabels[c.status]}</Badge>
-                  <Link
-                    href={`/admin/chat/${c.id}`}
-                    className="text-sm text-primary hover:underline"
-                  >
-                    Ver detalle
-                  </Link>
-                </div>
-              </div>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-3">
-                {c.messages.map((m) => (
-                  <div key={m.id} className="flex items-start justify-between gap-3">
-                    <div
-                      className={`flex-1 rounded-lg border p-3 ${
-                        m.isFromUser ? 'bg-primary/5 border-primary/20' : 'bg-secondary/40'
-                      }`}
-                    >
-                      <div className="text-xs text-muted-foreground mb-1">
-                        {m.isFromUser ? 'Usuario' : 'Admin'} ·{' '}
-                        {new Date(m.createdAt).toLocaleString('es-ES')}
-                      </div>
-                      <div className="text-sm whitespace-pre-wrap">{m.content}</div>
-                    </div>
-                    {c.status !== 'CLOSED' && (
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={() => {
-                          setReplyForConversationId(c.id)
-                          setReplyText('')
-                        }}
-                      >
-                        Reply
-                      </Button>
-                    )}
-                  </div>
-                ))}
+      <div className="space-y-4">
+        {conversations.map((conversation) => {
+          const firstMessage = conversation.messages[0]
+          const statusLabels: Record<string, string> = {
+            OPEN: 'Abierta',
+            IN_PROGRESS: 'En progreso',
+            CLOSED: 'Cerrada',
+          }
 
-                {replyForConversationId === c.id && c.status !== 'CLOSED' && (
-                  <div className="mt-4 rounded-lg border p-3">
-                    <div className="text-sm font-medium mb-2">Responder ahora</div>
-                    <div className="flex gap-2">
-                      <input
-                        type="text"
-                        value={replyText}
-                        onChange={(e) => setReplyText(e.target.value)}
-                        placeholder="Escribe tu respuesta..."
-                        className="flex-1 px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-primary"
-                        disabled={sending}
-                        onKeyDown={(e) => {
-                          if (e.key === 'Enter') sendReply(c.id)
-                        }}
-                      />
-                      <Button onClick={() => sendReply(c.id)} disabled={sending || !replyText.trim()}>
-                        Enviar
-                      </Button>
-                      <Button
-                        type="button"
-                        variant="outline"
-                        onClick={() => {
-                          setReplyForConversationId(null)
-                          setReplyText('')
-                        }}
-                        disabled={sending}
-                      >
-                        Cancelar
-                      </Button>
-                    </div>
+          return (
+            <Link key={conversation.id} href={`/admin/chat/${conversation.id}`}>
+              <Card className="hover:shadow-lg transition-shadow cursor-pointer">
+                <CardHeader>
+                  <div className="flex items-center justify-between">
+                    <CardTitle className="text-lg">
+                      Conversación {conversation.uuid.substring(0, 8)}...
+                    </CardTitle>
+                    <Badge className={getStatusColor(conversation.status)}>
+                      {statusLabels[conversation.status]}
+                    </Badge>
                   </div>
-                )}
-              </div>
-            </CardContent>
-          </Card>
-        ))}
+                </CardHeader>
+                <CardContent>
+                  {firstMessage && (
+                    <p className="text-sm text-muted-foreground mb-2 line-clamp-2">
+                      {firstMessage.content}
+                    </p>
+                  )}
+                  <div className="flex items-center justify-between text-xs text-muted-foreground">
+                    <span>{conversation._count.messages} mensajes</span>
+                    <span>{formatDate(conversation.createdAt)}</span>
+                  </div>
+                </CardContent>
+              </Card>
+            </Link>
+          )
+        })}
 
         {conversations.length === 0 && (
           <Card>
