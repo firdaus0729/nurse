@@ -53,7 +53,6 @@ export function EditableHomePage() {
         const activeSlides = slides
           .filter((s: any) => s.isActive)
           .sort((a: any, b: any) => a.order - b.order)
-          .slice(0, 3)
         setCarouselSlides(activeSlides)
       }
 

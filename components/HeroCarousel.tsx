@@ -23,11 +23,10 @@ interface HeroCarouselProps {
 
 export function HeroCarousel({ slides }: HeroCarouselProps) {
   const [currentIndex, setCurrentIndex] = useState(0)
-  // Only show first 3 active slides, sorted by order
+  // Show all active slides, sorted by order
   const activeSlides = slides
     .filter(slide => slide.isActive)
     .sort((a, b) => a.order - b.order)
-    .slice(0, 3)
 
   useEffect(() => {
     if (activeSlides.length <= 1) return
