@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import Link from 'next/link'
+import Image from 'next/image'
 import { useSession } from 'next-auth/react'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
@@ -180,38 +181,51 @@ export default function AdminContentPage() {
               </div>
             </CardHeader>
             <CardContent>
-              {a.excerpt && (
-                <p className="text-sm text-muted-foreground mb-4">{a.excerpt}</p>
-              )}
-              <div className="flex items-center gap-4 text-xs text-muted-foreground">
-                {a.category && <span>Categoría: {a.category.name}</span>}
-                <span>Vistas: {a.viewCount}</span>
-                <Link
-                  href={`/realities/${a.slug}`}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="text-primary hover:underline"
-                >
-                  Ver en web
-                </Link>
-              </div>
-              {isAdmin && (
-                <div className="flex gap-2 mt-4">
-                  <Button variant="outline" size="sm" onClick={() => openEdit(a)}>
-                    <Edit className="h-4 w-4 mr-1" />
-                    Editar
-                  </Button>
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => handleDelete(a.id)}
-                    className="text-destructive hover:text-destructive"
-                  >
-                    <Trash2 className="h-4 w-4 mr-1" />
-                    Eliminar
-                  </Button>
+              <div className="flex items-start gap-4">
+                <div className="relative h-16 w-24 flex-shrink-0 rounded-md overflow-hidden bg-muted">
+                  <Image
+                    src={a.imageUrl || '/logo.png'}
+                    alt={a.title}
+                    fill
+                    className="object-cover"
+                    sizes="96px"
+                  />
                 </div>
-              )}
+                <div className="flex-1">
+                  {a.excerpt && (
+                    <p className="text-sm text-muted-foreground mb-2">{a.excerpt}</p>
+                  )}
+                  <div className="flex flex-wrap items-center gap-4 text-xs text-muted-foreground">
+                    {a.category && <span>Categoría: {a.category.name}</span>}
+                    <span>Vistas: {a.viewCount}</span>
+                    <Link
+                      href={`/realities/${a.slug}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-primary hover:underline"
+                    >
+                      Ver en web
+                    </Link>
+                  </div>
+                  {isAdmin && (
+                    <div className="flex gap-2 mt-3">
+                      <Button variant="outline" size="sm" onClick={() => openEdit(a)}>
+                        <Edit className="h-4 w-4 mr-1" />
+                        Editar
+                      </Button>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => handleDelete(a.id)}
+                        className="text-destructive hover:text-destructive"
+                      >
+                        <Trash2 className="h-4 w-4 mr-1" />
+                        Eliminar
+                      </Button>
+                    </div>
+                  )}
+                </div>
+              </div>
             </CardContent>
           </Card>
         ))}

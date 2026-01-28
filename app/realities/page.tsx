@@ -1,4 +1,5 @@
 import Link from 'next/link'
+import Image from 'next/image'
 import { prisma } from '@/lib/prisma'
 import { Badge } from '@/components/ui/badge'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
@@ -125,16 +126,15 @@ export default async function RealitiesPage({
                 {catArticles.map((a) => (
                   <Link key={a.id} href={`/realities/${a.slug}`}>
                     <Card className="h-full hover:shadow-lg transition-shadow overflow-hidden">
-                      {a.imageUrl ? (
-                        <div className="h-40 w-full overflow-hidden bg-muted">
-                          <img
-                            src={a.imageUrl}
-                            alt={a.title}
-                            className="h-full w-full object-cover"
-                            loading="lazy"
-                          />
-                        </div>
-                      ) : null}
+                      <div className="relative h-44 w-full overflow-hidden bg-muted">
+                        <Image
+                          src={a.imageUrl || '/logo.png'}
+                          alt={a.title}
+                          fill
+                          className="object-cover"
+                          sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
+                        />
+                      </div>
                       <CardHeader className="pb-2">
                         <div className="flex flex-wrap items-center gap-2 mb-1">
                           <Badge variant="secondary" className="text-xs font-medium">
