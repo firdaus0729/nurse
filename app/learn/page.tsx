@@ -97,7 +97,18 @@ export default async function LearnPage() {
                       {sectionTitle}
                     </h2>
                   )}
-                  <StiCardGrid items={items} />
+                  {items.length > 0 ? (
+                    <StiCardGrid items={items} />
+                  ) : section.content?.trim() ? (
+                    <div
+                      className="text-muted-foreground"
+                      dangerouslySetInnerHTML={{ __html: section.content }}
+                    />
+                  ) : (
+                    <p className="text-sm text-muted-foreground">
+                      No hay elementos configurados para esta sección.
+                    </p>
+                  )}
                 </section>
               )
             }
