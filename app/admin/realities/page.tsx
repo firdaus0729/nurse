@@ -66,9 +66,11 @@ export default function AdminRealitiesPage() {
       if (!map.has(key)) map.set(key, [])
       map.get(key)!.push(a)
     }
-    for (const list of map.values()) {
-      list.sort((a, b) => (a.publishedAt || '').localeCompare(b.publishedAt || '')).reverse()
-    }
+    Array.from(map.values()).forEach((list) => {
+      list
+        .sort((a, b) => (a.publishedAt || '').localeCompare(b.publishedAt || ''))
+        .reverse()
+    })
     return map
   }, [articles])
 
