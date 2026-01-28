@@ -94,11 +94,6 @@ export default async function AdminDashboard() {
                 Gestionar contenido
               </Button>
             </Link>
-            <Link href="/admin/realities">
-              <Button variant="outline" className="w-full justify-start">
-                Gestionar Realidades
-              </Button>
-            </Link>
             <Link href="/admin/learn">
               <Button variant="outline" className="w-full justify-start">
                 Editar Infórmate
