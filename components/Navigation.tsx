@@ -6,7 +6,7 @@ import Image from 'next/image'
 import { usePathname, useRouter } from 'next/navigation'
 import { signOut, useSession } from 'next-auth/react'
 import { cn } from '@/lib/utils'
-import { Menu, X, LogOut } from 'lucide-react'
+import { Menu, X, LogOut, MessageCircle } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 
 const navItems = [
@@ -68,6 +68,22 @@ export function Navigation() {
               {item.label}
             </Link>
           ))}
+
+          {/* Chat icon */}
+          <Link
+            href="/chat"
+            className={cn(
+              "inline-flex items-center justify-center rounded-md p-2 transition-colors",
+              pathname === '/chat'
+                ? "bg-primary/10 text-primary"
+                : "text-muted-foreground hover:bg-accent hover:text-accent-foreground"
+            )}
+            aria-label="Abrir chat"
+            title="Chat"
+          >
+            <MessageCircle className="h-5 w-5" />
+          </Link>
+
           {session && (
             <Button
               variant="outline"
@@ -117,6 +133,19 @@ export function Navigation() {
                 {item.label}
               </Link>
             ))}
+            <Link
+              href="/chat"
+              onClick={closeMobileMenu}
+              className={cn(
+                "flex items-center gap-2 px-4 py-3 text-sm font-medium rounded-md transition-colors",
+                pathname === '/chat'
+                  ? "bg-primary/10 text-primary"
+                  : "text-muted-foreground hover:bg-accent hover:text-accent-foreground"
+              )}
+            >
+              <MessageCircle className="h-4 w-4" />
+              Chat
+            </Link>
             {session && (
               <button
                 onClick={() => {

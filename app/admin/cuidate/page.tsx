@@ -36,6 +36,7 @@ export default function AdminCuidatePage() {
   const [modalOpen, setModalOpen] = useState(false)
   const [editingIndex, setEditingIndex] = useState<number | null>(null)
   const [saving, setSaving] = useState(false)
+  const [reordering, setReordering] = useState(false)
   const [form, setForm] = useState<CuidateCard>({
     key: '',
     title: '',
@@ -112,15 +113,21 @@ export default function AdminCuidatePage() {
     ;[newCards[index], newCards[newIndex]] = [newCards[newIndex], newCards[index]]
 
     try {
+      setReordering(true)
+      // Optimistic update (feels instant)
+      setCards(newCards)
       const res = await fetch('/api/admin/cuidate', {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ cards: newCards }),
       })
-      if (res.ok) load()
+      if (!res.ok) throw new Error('Error')
     } catch (err) {
       console.error(err)
       alert('Error al reordenar')
+      load()
+    } finally {
+      setReordering(false)
     }
   }
 
@@ -148,7 +155,7 @@ export default function AdminCuidatePage() {
                     variant="outline"
                     size="sm"
                     onClick={() => moveCard(index, 'up')}
-                    disabled={index === 0}
+                    disabled={index === 0 || reordering}
                   >
                     ↑
                   </Button>
@@ -156,7 +163,7 @@ export default function AdminCuidatePage() {
                     variant="outline"
                     size="sm"
                     onClick={() => moveCard(index, 'down')}
-                    disabled={index === cards.length - 1}
+                    disabled={index === cards.length - 1 || reordering}
                   >
                     ↓
                   </Button>

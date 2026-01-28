@@ -24,12 +24,14 @@ export async function PATCH(
     }
 
     const body = await request.json()
-    const { title, content, order } = body
+    const { title, content, order, type, metadata } = body
 
     const updateData: any = {}
     if (title !== undefined) updateData.title = title || null
     if (content !== undefined) updateData.content = content
     if (order !== undefined) updateData.order = order
+    if (type !== undefined) updateData.type = type
+    if (metadata !== undefined) updateData.metadata = metadata
 
     const section = await prisma.section.update({
       where: { id: params.id },

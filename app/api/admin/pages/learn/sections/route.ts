@@ -62,9 +62,10 @@ export async function POST(request: NextRequest) {
     }
 
     const body = await request.json()
-    const { title, content, order } = body
+    const { title, content, order, type, metadata } = body
 
-    if (!content) {
+    // For CONTENT sections, content is required. For others, allow empty content.
+    if ((!type || type === 'CONTENT') && !content) {
       return NextResponse.json({ error: 'Content is required' }, { status: 400 })
     }
 
@@ -87,9 +88,10 @@ export async function POST(request: NextRequest) {
       data: {
         pageId: page.id,
         title: title || null,
-        content: content,
-        type: 'CONTENT',
+        content: content || '',
+        type: type || 'CONTENT',
         order: order ?? 0,
+        metadata: metadata ?? undefined,
       },
     })
 

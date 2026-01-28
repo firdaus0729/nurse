@@ -33,6 +33,10 @@ export function EditableHomePage() {
 
   const [carouselSlides, setCarouselSlides] = useState<HomeCarouselSlide[]>([])
   const [quickAccessCards, setQuickAccessCards] = useState<HomeQuickAccessCard[]>([])
+  const [welcomeTitle, setWelcomeTitle] = useState('Bienvenido/a a BE NURSE')
+  const [welcomeText, setWelcomeText] = useState(
+    'Un espacio seguro para informarte y cuidarte. Aquí puedes resolver tus dudas sobre salud sexual, acceder a información clara y hablar de forma anónima con profesionales de enfermería.'
+  )
   const [loading, setLoading] = useState(true)
   const [editCarouselOpen, setEditCarouselOpen] = useState(false)
   const [editQuickAccessOpen, setEditQuickAccessOpen] = useState(false)
@@ -43,9 +47,10 @@ export function EditableHomePage() {
 
   const loadData = async () => {
     try {
-      const [slidesRes, cardsRes] = await Promise.all([
+      const [slidesRes, cardsRes, welcomeRes] = await Promise.all([
         fetch('/api/admin/carousel'),
         fetch('/api/admin/quick-access'),
+        fetch('/api/admin/home/welcome'),
       ])
 
       if (slidesRes.ok) {
@@ -69,6 +74,12 @@ export function EditableHomePage() {
           })
           .sort((a: any, b: any) => a.order - b.order)
         setQuickAccessCards(activeCards)
+      }
+
+      if (welcomeRes.ok) {
+        const data = await welcomeRes.json()
+        if (data?.welcome?.title) setWelcomeTitle(data.welcome.title)
+        if (data?.welcome?.text) setWelcomeText(data.welcome.text)
       }
     } catch (error) {
       console.error('Error loading data:', error)
@@ -112,11 +123,10 @@ export function EditableHomePage() {
             />
           </div>
           <h2 className="text-3xl font-bold mb-4">
-            Bienvenido/a a BE NURSE
+            {welcomeTitle}
           </h2>
           <p className="text-lg text-muted-foreground mb-8">
-            Un espacio seguro para informarte y cuidarte. Aquí puedes resolver tus dudas sobre salud sexual,
-            acceder a información clara y hablar de forma anónima con profesionales de enfermería.
+            {welcomeText}
           </p>
         </div>
       </div>

@@ -29,6 +29,8 @@ export default function AdminLearnPage() {
     title: '',
     content: '',
     order: 0,
+    type: 'CONTENT',
+    metadataJson: '',
   })
 
   useEffect(() => {
@@ -55,6 +57,8 @@ export default function AdminLearnPage() {
       title: '',
       content: '',
       order: sections.length,
+      type: 'CONTENT',
+      metadataJson: '',
     })
     setModalOpen(true)
   }
@@ -65,6 +69,8 @@ export default function AdminLearnPage() {
       title: section.title || '',
       content: section.content || '',
       order: section.order || 0,
+      type: section.type || 'CONTENT',
+      metadataJson: section.metadata ? JSON.stringify(section.metadata, null, 2) : '',
     })
     setModalOpen(true)
   }
@@ -73,6 +79,31 @@ export default function AdminLearnPage() {
     e.preventDefault()
     setSaving(true)
     try {
+      let metadata: any = undefined
+      if (form.type === 'CARD_GRID') {
+        if (!form.metadataJson.trim()) {
+          alert('Para CARD_GRID, completa el JSON de metadata.')
+          setSaving(false)
+          return
+        }
+        try {
+          metadata = JSON.parse(form.metadataJson)
+        } catch {
+          alert('El JSON de metadata no es válido.')
+          setSaving(false)
+          return
+        }
+      } else if (form.metadataJson.trim()) {
+        // allow metadata for other types if provided
+        try {
+          metadata = JSON.parse(form.metadataJson)
+        } catch {
+          alert('El JSON de metadata no es válido.')
+          setSaving(false)
+          return
+        }
+      }
+
       const url = editing
         ? `/api/admin/pages/learn/sections/${editing.id}`
         : '/api/admin/pages/learn/sections'
@@ -80,7 +111,13 @@ export default function AdminLearnPage() {
       const res = await fetch(url, {
         method,
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(form),
+        body: JSON.stringify({
+          title: form.title,
+          content: form.content,
+          order: form.order,
+          type: form.type,
+          metadata,
+        }),
       })
       if (!res.ok) throw new Error('Error al guardar')
       setModalOpen(false)
@@ -129,7 +166,12 @@ export default function AdminLearnPage() {
         {sections.map((section) => (
           <Card key={section.id}>
             <CardHeader>
-              <CardTitle>{section.title || 'Sin título'}</CardTitle>
+              <CardTitle>
+                {section.title || 'Sin título'}{' '}
+                <span className="text-xs font-normal text-muted-foreground">
+                  ({section.type || 'CONTENT'})
+                </span>
+              </CardTitle>
             </CardHeader>
             <CardContent>
               <div
@@ -183,17 +225,51 @@ export default function AdminLearnPage() {
               />
             </div>
             <div>
+              <label className="block text-sm font-medium mb-1">Tipo</label>
+              <select
+                value={form.type}
+                onChange={(e) => setForm({ ...form, type: e.target.value })}
+                className={inputClass}
+                disabled={!isAdmin}
+              >
+                <option value="CONTENT">CONTENT</option>
+                <option value="CARD_GRID">CARD_GRID (ITS más comunes)</option>
+                <option value="FAQ">FAQ</option>
+                <option value="ACCORDION">ACCORDION</option>
+              </select>
+              <p className="text-xs text-muted-foreground mt-1">
+                Para “ITS más comunes” usa <strong>CARD_GRID</strong> y completa la metadata.
+              </p>
+            </div>
+            <div>
               <label className="block text-sm font-medium mb-1">Contenido *</label>
               <textarea
                 value={form.content}
                 onChange={(e) => setForm({ ...form, content: e.target.value })}
                 rows={12}
                 className={inputClass}
-                required
+                required={form.type === 'CONTENT'}
                 disabled={!isAdmin}
               />
               <p className="text-xs text-muted-foreground mt-1">
                 Puedes usar HTML: &lt;p&gt;, &lt;strong&gt;, &lt;ul&gt;&lt;li&gt;, &lt;h4&gt;, etc.
+              </p>
+            </div>
+            <div>
+              <label className="block text-sm font-medium mb-1">Metadata (JSON)</label>
+              <textarea
+                value={form.metadataJson}
+                onChange={(e) => setForm({ ...form, metadataJson: e.target.value })}
+                rows={12}
+                className={inputClass}
+                placeholder={`Ejemplo para CARD_GRID:\n{\n  \"items\": [\n    {\n      \"key\": \"clamidia\",\n      \"name\": \"Clamidia\",\n      \"imageUrl\": \"/logo.png\",\n      \"whatIs\": \"...\",\n      \"symptoms\": \"...\",\n      \"transmission\": \"...\",\n      \"consequences\": \"...\",\n      \"treatment\": \"...\",\n      \"prevention\": \"...\"\n    }\n  ]\n}`}
+                disabled={!isAdmin}
+              />
+              <p className="text-xs text-muted-foreground mt-1">
+                Para CARD_GRID necesitas un objeto con <code>items</code> (array) y cada item debe tener:
+                <code> key, name, whatIs, symptoms, transmission, consequences, treatment, prevention</code>.
+                <br />
+                <code>imageUrl</code> es opcional.
               </p>
             </div>
             <div>

@@ -10,7 +10,6 @@ import {
   LayoutDashboard,
   MessageCircle,
   Home,
-  Upload as UploadIcon,
   FileText,
   Heart,
   Info,
@@ -21,7 +20,6 @@ import {
 const adminNavItems = [
   { href: '/admin', label: 'Dashboard', icon: LayoutDashboard },
   { href: '/admin/inicio', label: 'Inicio', icon: Home },
-  { href: '/admin/upload', label: 'Upload', icon: UploadIcon },
   { href: '/admin/chat', label: 'Chat', icon: MessageCircle },
   { href: '/admin/content', label: 'Contenido', icon: FileText },
   { href: '/admin/cuidate', label: 'Cuídate', icon: Heart },

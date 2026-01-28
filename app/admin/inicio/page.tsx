@@ -31,6 +31,7 @@ export default function AdminInicioPage() {
   const [editingSlide, setEditingSlide] = useState<any | null>(null)
   const [editingCard, setEditingCard] = useState<any | null>(null)
   const [saving, setSaving] = useState(false)
+  const [reordering, setReordering] = useState(false)
   const [slideForm, setSlideForm] = useState({
     title: '',
     subtitle: '',
@@ -57,9 +58,10 @@ export default function AdminInicioPage() {
 
   const loadData = async () => {
     try {
-      const [slidesRes, cardsRes] = await Promise.all([
+      const [slidesRes, cardsRes, welcomeRes] = await Promise.all([
         fetch('/api/admin/carousel'),
         fetch('/api/admin/quick-access'),
+        fetch('/api/admin/home/welcome'),
       ])
 
       if (slidesRes.ok) {
@@ -72,11 +74,14 @@ export default function AdminInicioPage() {
         setQuickAccessCards(cards.sort((a: any, b: any) => a.order - b.order))
       }
 
-      // Load welcome text from a page or use defaults
-      setWelcomeTitle('Bienvenido/a a BE NURSE')
-      setWelcomeText(
-        'Un espacio seguro para informarte y cuidarte. Aquí puedes resolver tus dudas sobre salud sexual, acceder a información clara y hablar de forma anónima con profesionales de enfermería.'
-      )
+      if (welcomeRes.ok) {
+        const data = await welcomeRes.json()
+        setWelcomeTitle(data?.welcome?.title || 'Bienvenido/a a BE NURSE')
+        setWelcomeText(
+          data?.welcome?.text ||
+            'Un espacio seguro para informarte y cuidarte. Aquí puedes resolver tus dudas sobre salud sexual, acceder a información clara y hablar de forma anónima con profesionales de enfermería.'
+        )
+      }
     } catch (error) {
       console.error('Error loading data:', error)
     } finally {
@@ -217,12 +222,15 @@ export default function AdminInicioPage() {
     const newIndex = direction === 'up' ? index - 1 : index + 1
     if (newIndex < 0 || newIndex >= carouselSlides.length) return
 
+    // Optimistic UI: swap locally first (feels instant)
     const slides = [...carouselSlides]
-    const temp = slides[index].order
-    slides[index].order = slides[newIndex].order
-    slides[newIndex].order = temp
+    const tempOrder = slides[index].order
+    slides[index] = { ...slides[index], order: slides[newIndex].order }
+    slides[newIndex] = { ...slides[newIndex], order: tempOrder }
+    setCarouselSlides(slides.sort((a: any, b: any) => a.order - b.order))
 
     try {
+      setReordering(true)
       await Promise.all([
         fetch(`/api/admin/carousel/${slides[index].id}`, {
           method: 'PATCH',
@@ -235,10 +243,36 @@ export default function AdminInicioPage() {
           body: JSON.stringify({ order: slides[newIndex].order }),
         }),
       ])
-      loadData()
     } catch (err) {
       console.error(err)
       alert('Error al reordenar')
+      // Re-sync if something went wrong
+      loadData()
+    } finally {
+      setReordering(false)
+    }
+  }
+
+  const saveWelcome = async () => {
+    if (!welcomeTitle.trim() || !welcomeText.trim()) {
+      alert('Completa título y texto')
+      return
+    }
+    setSaving(true)
+    try {
+      const res = await fetch('/api/admin/home/welcome', {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ title: welcomeTitle, text: welcomeText }),
+      })
+      if (!res.ok) throw new Error('Error')
+      // no need to reload; public home reads from same endpoint
+      alert('Guardado')
+    } catch (e) {
+      console.error(e)
+      alert('Error al guardar')
+    } finally {
+      setSaving(false)
     }
   }
 
@@ -276,10 +310,20 @@ export default function AdminInicioPage() {
                 </div>
                 {isAdmin && (
                   <div className="flex gap-2">
-                    <Button variant="outline" size="sm" onClick={() => moveSlide(slide.id, 'up')} disabled={index === 0}>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => moveSlide(slide.id, 'up')}
+                      disabled={index === 0 || reordering}
+                    >
                       <ArrowUp className="h-4 w-4" />
                     </Button>
-                    <Button variant="outline" size="sm" onClick={() => moveSlide(slide.id, 'down')} disabled={index === carouselSlides.length - 1}>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => moveSlide(slide.id, 'down')}
+                      disabled={index === carouselSlides.length - 1 || reordering}
+                    >
                       <ArrowDown className="h-4 w-4" />
                     </Button>
                     <Button variant="outline" size="sm" onClick={() => openSlideEdit(slide)}>
@@ -364,8 +408,8 @@ export default function AdminInicioPage() {
               />
             </div>
             {isAdmin && (
-              <Button onClick={() => alert('Funcionalidad de guardado de texto de bienvenida próximamente')}>
-                Guardar texto de bienvenida
+              <Button onClick={saveWelcome} disabled={saving || reordering}>
+                {saving ? 'Guardando…' : 'Guardar texto de bienvenida'}
               </Button>
             )}
           </div>
