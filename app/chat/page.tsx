@@ -11,9 +11,6 @@ export default function ChatPage() {
   const [input, setInput] = useState('')
   const [isLoading, setIsLoading] = useState(false)
   const [hasAcceptedRules, setHasAcceptedRules] = useState(false)
-  const messagesEndRef = useRef<HTMLDivElement>(null)
-  const messagesContainerRef = useRef<HTMLDivElement>(null)
-  const [shouldAutoScroll, setShouldAutoScroll] = useState(true)
 
   useEffect(() => {
     // Check if there's an existing conversation in localStorage
@@ -35,24 +32,6 @@ export default function ChatPage() {
     return () => clearInterval(interval)
   }, [conversationId])
 
-  useEffect(() => {
-    // Only autoscroll when the user is already near the bottom,
-    // so reading older messages doesn't get interrupted.
-    if (!shouldAutoScroll) return
-    messagesEndRef.current?.scrollIntoView({ behavior: 'auto' })
-  }, [messages])
-
-  const isNearBottom = () => {
-    const el = messagesContainerRef.current
-    if (!el) return true
-    const thresholdPx = 120
-    return el.scrollHeight - el.scrollTop - el.clientHeight < thresholdPx
-  }
-
-  const handleScroll = () => {
-    setShouldAutoScroll(isNearBottom())
-  }
-
   const loadMessages = async (convId: string) => {
     try {
       const response = await fetch(`/api/chat/${convId}`)
@@ -71,7 +50,6 @@ export default function ChatPage() {
     const messageText = input.trim()
     setInput('')
     setIsLoading(true)
-    setShouldAutoScroll(true)
 
     try {
       let convId = conversationId
@@ -204,11 +182,7 @@ export default function ChatPage() {
         <CardHeader className="border-b">
           <CardTitle className="text-lg">Conversación</CardTitle>
         </CardHeader>
-        <CardContent
-          ref={messagesContainerRef}
-          onScroll={handleScroll}
-          className="flex-1 overflow-y-auto p-4 space-y-4"
-        >
+        <CardContent className="flex-1 overflow-y-auto p-4 space-y-4">
           {messages.length === 0 ? (
             <div className="text-center text-muted-foreground py-8">
               <p>Envía un mensaje para comenzar la conversación.</p>
@@ -253,7 +227,6 @@ export default function ChatPage() {
               </div>
             </div>
           )}
-          <div ref={messagesEndRef} />
         </CardContent>
         <div className="border-t p-4">
           <div className="flex gap-2">
