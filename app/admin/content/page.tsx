@@ -12,9 +12,9 @@ import {
   DialogTitle,
   DialogDescription,
 } from '@/components/ui/dialog'
-import { ImageUpload } from '@/components/ImageUpload'
 import { ARTICLE_TYPE_LABELS } from '@/lib/utils'
 import { FileText, Plus, Edit, Trash2 } from 'lucide-react'
+import { ImageUpload } from '@/components/ImageUpload'
 
 const articleTypes = [
   { value: 'HISTORIA_REAL', label: 'Historia real' },
@@ -291,16 +291,14 @@ export default function AdminContentPage() {
               </select>
             </div>
             <div>
-              <label className="block text-sm font-medium mb-1">Imagen (URL)</label>
-              <input
-                type="url"
-                value={form.imageUrl}
-                onChange={(e) => setForm({ ...form, imageUrl: e.target.value })}
-                className={inputClass}
-                placeholder="https://..."
+              <label className="block text-sm font-medium mb-1">Imagen</label>
+              <ImageUpload
+                value={form.imageUrl || ''}
+                onChange={(url) => setForm({ ...form, imageUrl: url })}
+                disabled={!isAdmin}
               />
               <p className="text-xs text-muted-foreground mt-1">
-                Enlaza una foto subida a Imgur, Google Drive (enlace público), etc.
+                Sube una imagen o pega una URL. La imagen aparecerá en la tarjeta de Realidades y en la página del artículo.
               </p>
             </div>
             <div>
