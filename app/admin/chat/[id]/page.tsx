@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect, useRef } from 'react'
+import { useState, useEffect } from 'react'
 import { useParams, useRouter } from 'next/navigation'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
@@ -15,7 +15,6 @@ export default function AdminChatDetailPage() {
   const [input, setInput] = useState('')
   const [isLoading, setIsLoading] = useState(false)
   const [status, setStatus] = useState('')
-  const messagesEndRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
     loadConversation()
@@ -23,10 +22,6 @@ export default function AdminChatDetailPage() {
     const interval = setInterval(loadConversation, 5000)
     return () => clearInterval(interval)
   }, [conversationId])
-
-  useEffect(() => {
-    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' })
-  }, [messages])
 
   const loadConversation = async () => {
     try {
@@ -154,7 +149,6 @@ export default function AdminChatDetailPage() {
               </div>
             </div>
           ))}
-          <div ref={messagesEndRef} />
         </CardContent>
         {status !== 'CLOSED' && (
           <div className="border-t p-4">
