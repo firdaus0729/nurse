@@ -97,6 +97,31 @@ export default function AdminLearnPage() {
       }
     }
 
+    // Parse STI items if it's CARD_GRID type
+    let stiItems: Array<{
+      key: string
+      name: string
+      imageUrl?: string | null
+      whatIs: string
+      symptoms: string
+      transmission: string
+      consequences: string
+      treatment: string
+      prevention: string
+    }> = []
+    if (section.type === 'CARD_GRID' && section.metadata) {
+      try {
+        const metadata = typeof section.metadata === 'string'
+          ? JSON.parse(section.metadata)
+          : section.metadata
+        if (Array.isArray((metadata as any).items)) {
+          stiItems = (metadata as any).items
+        }
+      } catch (e) {
+        // ignore parsing errors
+      }
+    }
+
     setForm({
       title: section.title || '',
       content: section.content || '',
@@ -104,6 +129,7 @@ export default function AdminLearnPage() {
       type: section.type || 'CONTENT',
       metadataJson: section.metadata ? JSON.stringify(section.metadata, null, 2) : '',
       faqItems,
+      stiItems,
     })
     setModalOpen(true)
   }
