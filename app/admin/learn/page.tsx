@@ -208,10 +208,15 @@ export default function AdminLearnPage() {
         }
       } else if (form.type === 'CARD_GRID') {
         if (form.stiItems.length > 0) {
-          // Filter out incomplete items
-          const validItems = form.stiItems.filter(item =>
-            item.key.trim() && item.name.trim() && item.whatIs.trim()
-          )
+          // Filter out incomplete items; use nurse icon as default when no image is set
+          const validItems = form.stiItems
+            .filter(item =>
+              item.key.trim() && item.name.trim() && item.whatIs.trim()
+            )
+            .map(item => ({
+              ...item,
+              imageUrl: item.imageUrl?.trim() || '/logo.png',
+            }))
           if (validItems.length === 0) {
             alert('Añade al menos un elemento completo (key, name, whatIs son obligatorios).')
             setSaving(false)
@@ -590,10 +595,13 @@ export default function AdminLearnPage() {
                           <div>
                             <label className="text-xs font-medium text-muted-foreground">Imagen</label>
                             <ImageUpload
-                              value={item.imageUrl || ''}
+                              value={item.imageUrl && item.imageUrl !== '/logo.png' ? item.imageUrl : ''}
                               onChange={(url) => updateStiItem(idx, 'imageUrl', url)}
                               disabled={!isAdmin}
                             />
+                            <p className="text-xs text-muted-foreground mt-1">
+                              Si no subes imagen, se usará el icono de enfermera por defecto.
+                            </p>
                           </div>
                           <div>
                             <label className="text-xs font-medium text-muted-foreground">¿Qué es? *</label>
