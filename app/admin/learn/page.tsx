@@ -11,6 +11,8 @@ import {
   DialogTitle,
 } from '@/components/ui/dialog'
 import { Plus, Edit, Trash2 } from 'lucide-react'
+import Image from 'next/image'
+import { ImageUpload } from '@/components/ImageUpload'
 
 const inputClass =
   'w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-primary'
@@ -318,6 +320,31 @@ export default function AdminLearnPage() {
             }
           }
 
+          // Parse STI items for CARD_GRID sections (like user page ITS más comunes)
+          let stiItems: Array<{
+            key: string
+            name: string
+            imageUrl?: string | null
+            whatIs?: string
+            symptoms?: string
+            transmission?: string
+            consequences?: string
+            treatment?: string
+            prevention?: string
+          }> = []
+          if (section.type === 'CARD_GRID' && section.metadata) {
+            try {
+              const metadata = typeof section.metadata === 'string'
+                ? JSON.parse(section.metadata)
+                : section.metadata
+              if (Array.isArray((metadata as any).items)) {
+                stiItems = (metadata as any).items
+              }
+            } catch (e) {
+              // ignore parsing errors
+            }
+          }
+
           return (
             <Card key={section.id}>
               <CardHeader>
@@ -329,8 +356,35 @@ export default function AdminLearnPage() {
                 </CardTitle>
               </CardHeader>
               <CardContent>
-                {/* Show FAQ items if available */}
-                {faqItems.length > 0 ? (
+                {/* Show CARD_GRID items (ITS más comunes) like user page */}
+                {stiItems.length > 0 ? (
+                  <div className="mb-4">
+                    <p className="text-xs text-muted-foreground mb-3">
+                      {stiItems.length} elemento{stiItems.length !== 1 ? 's' : ''} configurado{stiItems.length !== 1 ? 's' : ''}:
+                    </p>
+                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                      {stiItems.map((item, idx) => (
+                        <div key={idx} className="border rounded-lg overflow-hidden bg-card">
+                          <div className="relative h-32 w-full bg-muted">
+                            <Image
+                              src={item.imageUrl || '/logo.png'}
+                              alt={item.name || ''}
+                              fill
+                              className="object-cover"
+                              sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
+                            />
+                          </div>
+                          <div className="p-3">
+                            <p className="font-semibold text-sm">{item.name || item.key || `Elemento ${idx + 1}`}</p>
+                            {item.whatIs && (
+                              <p className="text-xs text-muted-foreground line-clamp-2 mt-1">{item.whatIs}</p>
+                            )}
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                ) : faqItems.length > 0 ? (
                   <div className="mb-4 space-y-2">
                     {faqItems.map((item, idx) => (
                       <div key={idx} className="border-l-2 border-primary pl-3 py-1">
@@ -534,13 +588,10 @@ export default function AdminLearnPage() {
                             </div>
                           </div>
                           <div>
-                            <label className="text-xs font-medium text-muted-foreground">URL de imagen</label>
-                            <input
-                              type="text"
+                            <label className="text-xs font-medium text-muted-foreground">Imagen</label>
+                            <ImageUpload
                               value={item.imageUrl || ''}
-                              onChange={(e) => updateStiItem(idx, 'imageUrl', e.target.value)}
-                              className={inputClass}
-                              placeholder="/logo.png"
+                              onChange={(url) => updateStiItem(idx, 'imageUrl', url)}
                               disabled={!isAdmin}
                             />
                           </div>
