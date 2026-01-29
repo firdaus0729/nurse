@@ -31,6 +31,7 @@ export default function AdminLearnPage() {
     order: 0,
     type: 'CONTENT',
     metadataJson: '',
+    faqItems: [] as Array<{ question: string; answer: string }>,
   })
 
   useEffect(() => {
@@ -59,20 +60,60 @@ export default function AdminLearnPage() {
       order: sections.length,
       type: 'CONTENT',
       metadataJson: '',
+      faqItems: [],
     })
     setModalOpen(true)
   }
 
   const openEdit = (section: any) => {
     setEditing(section)
+
+    // Parse FAQ items if it's FAQ/ACCORDION type
+    let faqItems: Array<{ question: string; answer: string }> = []
+    if ((section.type === 'FAQ' || section.type === 'ACCORDION') && section.metadata) {
+      try {
+        const metadata = typeof section.metadata === 'string'
+          ? JSON.parse(section.metadata)
+          : section.metadata
+        if (Array.isArray(metadata.items)) {
+          faqItems = metadata.items
+        } else if (Array.isArray(metadata)) {
+          faqItems = metadata
+        }
+      } catch (e) {
+        // ignore parsing errors
+      }
+    }
+
     setForm({
       title: section.title || '',
       content: section.content || '',
       order: section.order || 0,
       type: section.type || 'CONTENT',
       metadataJson: section.metadata ? JSON.stringify(section.metadata, null, 2) : '',
+      faqItems,
     })
     setModalOpen(true)
+  }
+
+  const addFaqItem = () => {
+    setForm({
+      ...form,
+      faqItems: [...form.faqItems, { question: '', answer: '' }],
+    })
+  }
+
+  const updateFaqItem = (index: number, field: 'question' | 'answer', value: string) => {
+    const updated = [...form.faqItems]
+    updated[index] = { ...updated[index], [field]: value }
+    setForm({ ...form, faqItems: updated })
+  }
+
+  const removeFaqItem = (index: number) => {
+    setForm({
+      ...form,
+      faqItems: form.faqItems.filter((_, i) => i !== index),
+    })
   }
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -80,7 +121,22 @@ export default function AdminLearnPage() {
     setSaving(true)
     try {
       let metadata: any = undefined
-      if (form.type === 'CARD_GRID') {
+
+      // Handle FAQ/ACCORDION: convert faqItems to metadata
+      if (form.type === 'FAQ' || form.type === 'ACCORDION') {
+        if (form.faqItems.length > 0) {
+          metadata = { items: form.faqItems.filter(item => item.question.trim() && item.answer.trim()) }
+        } else if (form.metadataJson.trim()) {
+          // Fallback to JSON if provided
+          try {
+            metadata = JSON.parse(form.metadataJson)
+          } catch {
+            alert('El JSON de metadata no es válido.')
+            setSaving(false)
+            return
+          }
+        }
+      } else if (form.type === 'CARD_GRID') {
         if (!form.metadataJson.trim()) {
           alert('Para CARD_GRID, completa el JSON de metadata.')
           setSaving(false)
@@ -163,41 +219,76 @@ export default function AdminLearnPage() {
       </div>
 
       <div className="space-y-4">
-        {sections.map((section) => (
-          <Card key={section.id}>
-            <CardHeader>
-              <CardTitle>
-                {section.title || 'Sin título'}{' '}
-                <span className="text-xs font-normal text-muted-foreground">
-                  ({section.type || 'CONTENT'})
-                </span>
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div
-                className="prose max-w-none text-muted-foreground mb-4"
-                dangerouslySetInnerHTML={{ __html: section.content }}
-              />
-              {isAdmin && (
-                <div className="flex gap-2">
-                  <Button variant="outline" size="sm" onClick={() => openEdit(section)}>
-                    <Edit className="h-4 w-4 mr-1" />
-                    Editar
-                  </Button>
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => handleDelete(section.id)}
-                    className="text-destructive hover:text-destructive"
-                  >
-                    <Trash2 className="h-4 w-4 mr-1" />
-                    Eliminar
-                  </Button>
-                </div>
-              )}
-            </CardContent>
-          </Card>
-        ))}
+        {sections.map((section) => {
+          // Parse metadata for FAQ/ACCORDION sections
+          let faqItems: Array<{ question: string; answer: string }> = []
+          if ((section.type === 'FAQ' || section.type === 'ACCORDION') && section.metadata) {
+            try {
+              const metadata = typeof section.metadata === 'string'
+                ? JSON.parse(section.metadata)
+                : section.metadata
+              if (Array.isArray(metadata.items)) {
+                faqItems = metadata.items
+              } else if (Array.isArray(metadata)) {
+                faqItems = metadata
+              }
+            } catch (e) {
+              // ignore parsing errors
+            }
+          }
+
+          return (
+            <Card key={section.id}>
+              <CardHeader>
+                <CardTitle>
+                  {section.title || 'Sin título'}{' '}
+                  <span className="text-xs font-normal text-muted-foreground">
+                    ({section.type || 'CONTENT'})
+                  </span>
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                {/* Show FAQ items if available */}
+                {faqItems.length > 0 ? (
+                  <div className="mb-4 space-y-2">
+                    {faqItems.map((item, idx) => (
+                      <div key={idx} className="border-l-2 border-primary pl-3 py-1">
+                        <p className="font-medium text-sm">{item.question}</p>
+                        <p className="text-xs text-muted-foreground line-clamp-2">{item.answer}</p>
+                      </div>
+                    ))}
+                  </div>
+                ) : section.content?.trim() ? (
+                  <div
+                    className="prose max-w-none text-muted-foreground mb-4"
+                    dangerouslySetInnerHTML={{ __html: section.content }}
+                  />
+                ) : (
+                  <p className="text-sm text-muted-foreground mb-4 italic">
+                    Sin contenido configurado
+                  </p>
+                )}
+                {isAdmin && (
+                  <div className="flex gap-2">
+                    <Button variant="outline" size="sm" onClick={() => openEdit(section)}>
+                      <Edit className="h-4 w-4 mr-1" />
+                      Editar
+                    </Button>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => handleDelete(section.id)}
+                      className="text-destructive hover:text-destructive"
+                    >
+                      <Trash2 className="h-4 w-4 mr-1" />
+                      Eliminar
+                    </Button>
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+          )
+        })}
       </div>
 
       {sections.length === 0 && (
@@ -228,50 +319,130 @@ export default function AdminLearnPage() {
               <label className="block text-sm font-medium mb-1">Tipo</label>
               <select
                 value={form.type}
-                onChange={(e) => setForm({ ...form, type: e.target.value })}
+                onChange={(e) => {
+                  const newType = e.target.value
+                  // Reset FAQ items if switching away from FAQ/ACCORDION
+                  setForm({
+                    ...form,
+                    type: newType,
+                    faqItems: (newType === 'FAQ' || newType === 'ACCORDION') ? form.faqItems : [],
+                  })
+                }}
                 className={inputClass}
                 disabled={!isAdmin}
               >
                 <option value="CONTENT">CONTENT</option>
                 <option value="CARD_GRID">CARD_GRID (ITS más comunes)</option>
-                <option value="FAQ">FAQ</option>
+                <option value="FAQ">FAQ (Preguntas frecuentes)</option>
                 <option value="ACCORDION">ACCORDION</option>
               </select>
               <p className="text-xs text-muted-foreground mt-1">
                 Para “ITS más comunes” usa <strong>CARD_GRID</strong> y completa la metadata.
-              </p>
-            </div>
-            <div>
-              <label className="block text-sm font-medium mb-1">Contenido *</label>
-              <textarea
-                value={form.content}
-                onChange={(e) => setForm({ ...form, content: e.target.value })}
-                rows={12}
-                className={inputClass}
-                required={form.type === 'CONTENT'}
-                disabled={!isAdmin}
-              />
-              <p className="text-xs text-muted-foreground mt-1">
-                Puedes usar HTML: &lt;p&gt;, &lt;strong&gt;, &lt;ul&gt;&lt;li&gt;, &lt;h4&gt;, etc.
-              </p>
-            </div>
-            <div>
-              <label className="block text-sm font-medium mb-1">Metadata (JSON)</label>
-              <textarea
-                value={form.metadataJson}
-                onChange={(e) => setForm({ ...form, metadataJson: e.target.value })}
-                rows={12}
-                className={inputClass}
-                placeholder={`Ejemplo para CARD_GRID:\n{\n  \"items\": [\n    {\n      \"key\": \"clamidia\",\n      \"name\": \"Clamidia\",\n      \"imageUrl\": \"/logo.png\",\n      \"whatIs\": \"...\",\n      \"symptoms\": \"...\",\n      \"transmission\": \"...\",\n      \"consequences\": \"...\",\n      \"treatment\": \"...\",\n      \"prevention\": \"...\"\n    }\n  ]\n}`}
-                disabled={!isAdmin}
-              />
-              <p className="text-xs text-muted-foreground mt-1">
-                Para CARD_GRID necesitas un objeto con <code>items</code> (array) y cada item debe tener:
-                <code> key, name, whatIs, symptoms, transmission, consequences, treatment, prevention</code>.
                 <br />
-                <code>imageUrl</code> es opcional.
+                Para <strong>FAQ</strong> o <strong>ACCORDION</strong>, usa el editor de preguntas y respuestas.
               </p>
             </div>
+            {/* FAQ/ACCORDION Editor */}
+            {(form.type === 'FAQ' || form.type === 'ACCORDION') ? (
+              <div>
+                <div className="flex items-center justify-between mb-2">
+                  <label className="block text-sm font-medium">Preguntas y Respuestas</label>
+                  {isAdmin && (
+                    <Button type="button" variant="outline" size="sm" onClick={addFaqItem}>
+                      <Plus className="h-3 w-3 mr-1" />
+                      Añadir pregunta
+                    </Button>
+                  )}
+                </div>
+                <div className="space-y-3 border rounded-md p-4">
+                  {form.faqItems.length === 0 ? (
+                    <p className="text-sm text-muted-foreground text-center py-4">
+                      No hay preguntas. Haz clic en "Añadir pregunta" para comenzar.
+                    </p>
+                  ) : (
+                    form.faqItems.map((item, idx) => (
+                      <div key={idx} className="border rounded-md p-3 bg-muted/30">
+                        <div className="space-y-2">
+                          <div>
+                            <label className="text-xs font-medium text-muted-foreground">Pregunta</label>
+                            <input
+                              type="text"
+                              value={item.question}
+                              onChange={(e) => updateFaqItem(idx, 'question', e.target.value)}
+                              className={inputClass}
+                              placeholder="¿Cuál es tu pregunta?"
+                              disabled={!isAdmin}
+                            />
+                          </div>
+                          <div>
+                            <label className="text-xs font-medium text-muted-foreground">Respuesta</label>
+                            <textarea
+                              value={item.answer}
+                              onChange={(e) => updateFaqItem(idx, 'answer', e.target.value)}
+                              rows={3}
+                              className={inputClass}
+                              placeholder="Escribe la respuesta..."
+                              disabled={!isAdmin}
+                            />
+                            <p className="text-xs text-muted-foreground mt-1">
+                              Puedes usar HTML: &lt;p&gt;, &lt;strong&gt;, &lt;ul&gt;&lt;li&gt;, etc.
+                            </p>
+                          </div>
+                          {isAdmin && (
+                            <Button
+                              type="button"
+                              variant="outline"
+                              size="sm"
+                              onClick={() => removeFaqItem(idx)}
+                              className="text-destructive hover:text-destructive"
+                            >
+                              <Trash2 className="h-3 w-3 mr-1" />
+                              Eliminar
+                            </Button>
+                          )}
+                        </div>
+                      </div>
+                    ))
+                  )}
+                </div>
+              </div>
+            ) : (
+              <>
+                <div>
+                  <label className="block text-sm font-medium mb-1">Contenido *</label>
+                  <textarea
+                    value={form.content}
+                    onChange={(e) => setForm({ ...form, content: e.target.value })}
+                    rows={12}
+                    className={inputClass}
+                    required={form.type === 'CONTENT'}
+                    disabled={!isAdmin}
+                  />
+                  <p className="text-xs text-muted-foreground mt-1">
+                    Puedes usar HTML: &lt;p&gt;, &lt;strong&gt;, &lt;ul&gt;&lt;li&gt;, &lt;h4&gt;, etc.
+                  </p>
+                </div>
+                {form.type === 'CARD_GRID' && (
+                  <div>
+                    <label className="block text-sm font-medium mb-1">Metadata (JSON) *</label>
+                    <textarea
+                      value={form.metadataJson}
+                      onChange={(e) => setForm({ ...form, metadataJson: e.target.value })}
+                      rows={12}
+                      className={inputClass}
+                      placeholder={`Ejemplo para CARD_GRID:\n{\n  \"items\": [\n    {\n      \"key\": \"clamidia\",\n      \"name\": \"Clamidia\",\n      \"imageUrl\": \"/logo.png\",\n      \"whatIs\": \"...\",\n      \"symptoms\": \"...\",\n      \"transmission\": \"...\",\n      \"consequences\": \"...\",\n      \"treatment\": \"...\",\n      \"prevention\": \"...\"\n    }\n  ]\n}`}
+                      disabled={!isAdmin}
+                    />
+                    <p className="text-xs text-muted-foreground mt-1">
+                      Para CARD_GRID necesitas un objeto con <code>items</code> (array) y cada item debe tener:
+                      <code> key, name, whatIs, symptoms, transmission, consequences, treatment, prevention</code>.
+                      <br />
+                      <code>imageUrl</code> es opcional.
+                    </p>
+                  </div>
+                )}
+              </>
+            )}
             <div>
               <label className="block text-sm font-medium mb-1">Orden</label>
               <input
