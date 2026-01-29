@@ -3,12 +3,18 @@ import { prisma } from '@/lib/prisma'
 import { notFound } from 'next/navigation'
 import { formatDate, ARTICLE_TYPE_LABELS } from '@/lib/utils'
 import { Badge } from '@/components/ui/badge'
+import { getServerSession } from 'next-auth'
+import { authOptions } from '@/lib/auth'
 
 export default async function ArticlePage({
   params,
 }: {
   params: { slug: string }
 }) {
+  const session = await getServerSession(authOptions)
+  const userRole = (session?.user as any)?.role
+  const isAdmin = userRole === 'ADMIN'
+
   let article: {
     id: string
     title: string
@@ -35,17 +41,21 @@ export default async function ArticlePage({
     console.error('Database connection error:', e)
   }
 
-  if (!article || !article.isPublished) {
+  // Only published articles are public. Admins can preview drafts.
+  if (!article || (!article.isPublished && !isAdmin)) {
     notFound()
   }
 
-  try {
-    await prisma.article.update({
-      where: { id: article.id },
-      data: { viewCount: { increment: 1 } },
-    })
-  } catch {
-    // ignore view-count errors
+  // Only count views for public (published) reads
+  if (article.isPublished) {
+    try {
+      await prisma.article.update({
+        where: { id: article.id },
+        data: { viewCount: { increment: 1 } },
+      })
+    } catch {
+      // ignore view-count errors
+    }
   }
 
   const typeLabel = ARTICLE_TYPE_LABELS[article.articleType] ?? article.articleType
@@ -69,6 +79,7 @@ export default async function ArticlePage({
       <article>
         <div className="flex flex-wrap items-center gap-2 mb-3">
           <Badge variant="secondary">{typeLabel}</Badge>
+          {!article.isPublished && isAdmin && <Badge variant="outline">Borrador</Badge>}
           {article.publishedAt && (
             <span className="text-sm text-muted-foreground">{formatDate(article.publishedAt)}</span>
           )}

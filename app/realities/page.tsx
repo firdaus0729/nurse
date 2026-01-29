@@ -58,13 +58,7 @@ export default async function RealitiesPage({
           </p>
         </div>
         {isAdmin && (
-          <Button
-            variant="outline"
-            onClick={() => {
-              // server component: use normal link fallback
-            }}
-            asChild
-          >
+          <Button variant="outline" asChild>
             <Link href="/admin/content" target="_blank" rel="noopener noreferrer">
               Editar contenido
             </Link>
