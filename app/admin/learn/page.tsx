@@ -32,6 +32,17 @@ export default function AdminLearnPage() {
     type: 'CONTENT',
     metadataJson: '',
     faqItems: [] as Array<{ question: string; answer: string }>,
+    stiItems: [] as Array<{
+      key: string
+      name: string
+      imageUrl?: string | null
+      whatIs: string
+      symptoms: string
+      transmission: string
+      consequences: string
+      treatment: string
+      prevention: string
+    }>,
   })
 
   useEffect(() => {
@@ -61,6 +72,7 @@ export default function AdminLearnPage() {
       type: 'CONTENT',
       metadataJson: '',
       faqItems: [],
+      stiItems: [],
     })
     setModalOpen(true)
   }
@@ -116,6 +128,36 @@ export default function AdminLearnPage() {
     })
   }
 
+  const addStiItem = () => {
+    setForm({
+      ...form,
+      stiItems: [...form.stiItems, {
+        key: '',
+        name: '',
+        imageUrl: null,
+        whatIs: '',
+        symptoms: '',
+        transmission: '',
+        consequences: '',
+        treatment: '',
+        prevention: '',
+      }],
+    })
+  }
+
+  const updateStiItem = (index: number, field: string, value: string) => {
+    const updated = [...form.stiItems]
+    updated[index] = { ...updated[index], [field]: value }
+    setForm({ ...form, stiItems: updated })
+  }
+
+  const removeStiItem = (index: number) => {
+    setForm({
+      ...form,
+      stiItems: form.stiItems.filter((_, i) => i !== index),
+    })
+  }
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     setSaving(true)
@@ -137,15 +179,28 @@ export default function AdminLearnPage() {
           }
         }
       } else if (form.type === 'CARD_GRID') {
-        if (!form.metadataJson.trim()) {
-          alert('Para CARD_GRID, completa el JSON de metadata.')
-          setSaving(false)
-          return
-        }
-        try {
-          metadata = JSON.parse(form.metadataJson)
-        } catch {
-          alert('El JSON de metadata no es válido.')
+        if (form.stiItems.length > 0) {
+          // Filter out incomplete items
+          const validItems = form.stiItems.filter(item =>
+            item.key.trim() && item.name.trim() && item.whatIs.trim()
+          )
+          if (validItems.length === 0) {
+            alert('Añade al menos un elemento completo (key, name, whatIs son obligatorios).')
+            setSaving(false)
+            return
+          }
+          metadata = { items: validItems }
+        } else if (form.metadataJson.trim()) {
+          // Fallback to JSON if provided
+          try {
+            metadata = JSON.parse(form.metadataJson)
+          } catch {
+            alert('El JSON de metadata no es válido.')
+            setSaving(false)
+            return
+          }
+        } else {
+          alert('Para CARD_GRID, añade elementos usando el editor o completa el JSON de metadata.')
           setSaving(false)
           return
         }
@@ -322,10 +377,12 @@ export default function AdminLearnPage() {
                 onChange={(e) => {
                   const newType = e.target.value
                   // Reset FAQ items if switching away from FAQ/ACCORDION
+                  // Reset STI items if switching away from CARD_GRID
                   setForm({
                     ...form,
                     type: newType,
                     faqItems: (newType === 'FAQ' || newType === 'ACCORDION') ? form.faqItems : [],
+                    stiItems: newType === 'CARD_GRID' ? form.stiItems : [],
                   })
                 }}
                 className={inputClass}
@@ -406,6 +463,148 @@ export default function AdminLearnPage() {
                   )}
                 </div>
               </div>
+            ) : form.type === 'CARD_GRID' ? (
+              <div>
+                <div className="flex items-center justify-between mb-2">
+                  <label className="block text-sm font-medium">ITS (Elementos de la cuadrícula)</label>
+                  {isAdmin && (
+                    <Button type="button" variant="outline" size="sm" onClick={addStiItem}>
+                      <Plus className="h-3 w-3 mr-1" />
+                      Añadir ITS
+                    </Button>
+                  )}
+                </div>
+                <div className="space-y-3 border rounded-md p-4 max-h-[600px] overflow-y-auto">
+                  {form.stiItems.length === 0 ? (
+                    <p className="text-sm text-muted-foreground text-center py-4">
+                      No hay elementos. Haz clic en "Añadir ITS" para comenzar.
+                    </p>
+                  ) : (
+                    form.stiItems.map((item, idx) => (
+                      <div key={idx} className="border rounded-md p-3 bg-muted/30">
+                        <div className="space-y-2">
+                          <div className="grid grid-cols-2 gap-2">
+                            <div>
+                              <label className="text-xs font-medium text-muted-foreground">Key *</label>
+                              <input
+                                type="text"
+                                value={item.key}
+                                onChange={(e) => updateStiItem(idx, 'key', e.target.value)}
+                                className={inputClass}
+                                placeholder="clamidia"
+                                disabled={!isAdmin}
+                              />
+                            </div>
+                            <div>
+                              <label className="text-xs font-medium text-muted-foreground">Nombre *</label>
+                              <input
+                                type="text"
+                                value={item.name}
+                                onChange={(e) => updateStiItem(idx, 'name', e.target.value)}
+                                className={inputClass}
+                                placeholder="Clamidia"
+                                disabled={!isAdmin}
+                              />
+                            </div>
+                          </div>
+                          <div>
+                            <label className="text-xs font-medium text-muted-foreground">URL de imagen</label>
+                            <input
+                              type="text"
+                              value={item.imageUrl || ''}
+                              onChange={(e) => updateStiItem(idx, 'imageUrl', e.target.value)}
+                              className={inputClass}
+                              placeholder="/logo.png"
+                              disabled={!isAdmin}
+                            />
+                          </div>
+                          <div>
+                            <label className="text-xs font-medium text-muted-foreground">¿Qué es? *</label>
+                            <textarea
+                              value={item.whatIs}
+                              onChange={(e) => updateStiItem(idx, 'whatIs', e.target.value)}
+                              rows={2}
+                              className={inputClass}
+                              placeholder="Descripción..."
+                              disabled={!isAdmin}
+                            />
+                          </div>
+                          <div>
+                            <label className="text-xs font-medium text-muted-foreground">Síntomas</label>
+                            <textarea
+                              value={item.symptoms}
+                              onChange={(e) => updateStiItem(idx, 'symptoms', e.target.value)}
+                              rows={2}
+                              className={inputClass}
+                              placeholder="Síntomas..."
+                              disabled={!isAdmin}
+                            />
+                          </div>
+                          <div>
+                            <label className="text-xs font-medium text-muted-foreground">Transmisión</label>
+                            <textarea
+                              value={item.transmission}
+                              onChange={(e) => updateStiItem(idx, 'transmission', e.target.value)}
+                              rows={2}
+                              className={inputClass}
+                              placeholder="Cómo se transmite..."
+                              disabled={!isAdmin}
+                            />
+                          </div>
+                          <div>
+                            <label className="text-xs font-medium text-muted-foreground">Consecuencias</label>
+                            <textarea
+                              value={item.consequences}
+                              onChange={(e) => updateStiItem(idx, 'consequences', e.target.value)}
+                              rows={2}
+                              className={inputClass}
+                              placeholder="Consecuencias..."
+                              disabled={!isAdmin}
+                            />
+                          </div>
+                          <div>
+                            <label className="text-xs font-medium text-muted-foreground">Tratamiento</label>
+                            <textarea
+                              value={item.treatment}
+                              onChange={(e) => updateStiItem(idx, 'treatment', e.target.value)}
+                              rows={2}
+                              className={inputClass}
+                              placeholder="Tratamiento..."
+                              disabled={!isAdmin}
+                            />
+                          </div>
+                          <div>
+                            <label className="text-xs font-medium text-muted-foreground">Prevención</label>
+                            <textarea
+                              value={item.prevention}
+                              onChange={(e) => updateStiItem(idx, 'prevention', e.target.value)}
+                              rows={2}
+                              className={inputClass}
+                              placeholder="Prevención..."
+                              disabled={!isAdmin}
+                            />
+                          </div>
+                          {isAdmin && (
+                            <Button
+                              type="button"
+                              variant="outline"
+                              size="sm"
+                              onClick={() => removeStiItem(idx)}
+                              className="text-destructive hover:text-destructive"
+                            >
+                              <Trash2 className="h-3 w-3 mr-1" />
+                              Eliminar
+                            </Button>
+                          )}
+                        </div>
+                      </div>
+                    ))
+                  )}
+                </div>
+                <p className="text-xs text-muted-foreground mt-2">
+                  También puedes usar el campo JSON de metadata más abajo para edición avanzada.
+                </p>
+              </div>
             ) : (
               <>
                 <div>
@@ -424,20 +623,17 @@ export default function AdminLearnPage() {
                 </div>
                 {form.type === 'CARD_GRID' && (
                   <div>
-                    <label className="block text-sm font-medium mb-1">Metadata (JSON) *</label>
+                    <label className="block text-sm font-medium mb-1">Metadata (JSON) - Opcional</label>
                     <textarea
                       value={form.metadataJson}
                       onChange={(e) => setForm({ ...form, metadataJson: e.target.value })}
-                      rows={12}
+                      rows={8}
                       className={inputClass}
-                      placeholder={`Ejemplo para CARD_GRID:\n{\n  \"items\": [\n    {\n      \"key\": \"clamidia\",\n      \"name\": \"Clamidia\",\n      \"imageUrl\": \"/logo.png\",\n      \"whatIs\": \"...\",\n      \"symptoms\": \"...\",\n      \"transmission\": \"...\",\n      \"consequences\": \"...\",\n      \"treatment\": \"...\",\n      \"prevention\": \"...\"\n    }\n  ]\n}`}
+                      placeholder={`Alternativa: puedes editar directamente el JSON aquí\n{\n  \"items\": [\n    {\n      \"key\": \"clamidia\",\n      \"name\": \"Clamidia\",\n      \"imageUrl\": \"/logo.png\",\n      \"whatIs\": \"...\",\n      \"symptoms\": \"...\",\n      \"transmission\": \"...\",\n      \"consequences\": \"...\",\n      \"treatment\": \"...\",\n      \"prevention\": \"...\"\n    }\n  ]\n}`}
                       disabled={!isAdmin}
                     />
                     <p className="text-xs text-muted-foreground mt-1">
-                      Para CARD_GRID necesitas un objeto con <code>items</code> (array) y cada item debe tener:
-                      <code> key, name, whatIs, symptoms, transmission, consequences, treatment, prevention</code>.
-                      <br />
-                      <code>imageUrl</code> es opcional.
+                      Si prefieres editar directamente el JSON, puedes hacerlo aquí. Los cambios del editor visual tienen prioridad.
                     </p>
                   </div>
                 )}
