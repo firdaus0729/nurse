@@ -3,7 +3,7 @@
 import { usePathname } from 'next/navigation'
 import { Navigation } from '@/components/Navigation'
 import { Footer } from '@/components/Footer'
-import { FloatingChatButton } from '@/components/FloatingChatButton'
+import { ChatCornerButton } from '@/components/ChatCornerButton'
 
 export function RootLayoutContent({ children }: { children: React.ReactNode }) {
   const pathname = usePathname()
@@ -23,7 +23,7 @@ export function RootLayoutContent({ children }: { children: React.ReactNode }) {
         {children}
       </main>
       <Footer />
-      <FloatingChatButton />
+      <ChatCornerButton />
     </>
   )
 }
