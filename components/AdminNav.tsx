@@ -10,10 +10,10 @@ import {
   LayoutDashboard,
   MessageCircle,
   Home,
-  FileText,
   Heart,
   Info,
   BookOpen,
+  Newspaper,
   LogOut,
 } from 'lucide-react'
 
@@ -21,9 +21,9 @@ const adminNavItems = [
   { href: '/admin', label: 'Dashboard', icon: LayoutDashboard },
   { href: '/admin/inicio', label: 'Inicio', icon: Home },
   { href: '/admin/chat', label: 'Chat', icon: MessageCircle },
-  { href: '/admin/content', label: 'Contenido', icon: FileText },
-  { href: '/admin/cuidate', label: 'Cuídate', icon: Heart },
   { href: '/admin/learn', label: 'Infórmate', icon: BookOpen },
+  { href: '/admin/cuidate', label: 'Cuídate', icon: Heart },
+  { href: '/admin/realities', label: 'Realidades', icon: Newspaper },
   { href: '/admin/about', label: 'Sobre nosotros', icon: Info },
 ]
 
