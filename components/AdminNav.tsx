@@ -18,7 +18,7 @@ import {
 } from 'lucide-react'
 
 const adminNavItems = [
-  { href: '/admin', label: 'Dashboard', icon: LayoutDashboard },
+  { href: '/admin', label: 'Dashboards', icon: LayoutDashboard },
   { href: '/admin/inicio', label: 'Inicio', icon: Home },
   { href: '/admin/chat', label: 'Chat', icon: MessageCircle },
   { href: '/admin/learn', label: 'Infórmate', icon: BookOpen },
