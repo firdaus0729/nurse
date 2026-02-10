@@ -1,15 +1,22 @@
 import { prisma } from '@/lib/prisma'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 
+export const dynamic = 'force-dynamic'
+
 export default async function LegalPage() {
-  const page = await prisma.page.findUnique({
-    where: { slug: 'legal' },
-    include: {
-      sections: {
-        orderBy: { order: 'asc' },
+  let page = null
+  try {
+    page = await prisma.page.findUnique({
+      where: { slug: 'legal' },
+      include: {
+        sections: {
+          orderBy: { order: 'asc' },
+        },
       },
-    },
-  })
+    })
+  } catch {
+    // Table may not exist yet (e.g. before first migration); use fallback content
+  }
 
   return (
     <div className="container py-8 max-w-4xl">
